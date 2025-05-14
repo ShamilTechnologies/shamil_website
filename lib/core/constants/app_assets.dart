@@ -55,5 +55,5 @@ static const String userAvatarMichael = '$_images/user_michael_avatar.png';
 static const String companyLogoApex = '$_images/company_apex_logo.png';
 static const String userAvatarRavi = '$_images/user_ravi_avatar.png';
 
-static const String shamilAppInterface = '$_images/shamil_app_interface.png';
+static const String shamilAppInterface = '$_images/shamil_app_interface.jpg';
 }
