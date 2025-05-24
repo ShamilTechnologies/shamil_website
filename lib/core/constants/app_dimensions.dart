@@ -5,10 +5,10 @@ class AppDimensions {
   static const double paddingMedium = 16.0;
   static const double paddingLarge = 24.0;
   static const double paddingExtraLarge = 32.0;
-  static const double paddingSectionVertical = 60.0; // Vertical space between sections
-  static const double paddingPageHorizontal = 20.0; // Default horizontal page padding
+  static const double paddingSectionVertical = 60.0; 
+  static const double paddingPageHorizontal = 20.0; 
 
-  // Spacing (e.g., between elements)
+  // Spacing 
   static const double spacingExtraSmall = 4.0;
   static const double spacingSmall = 8.0;
   static const double spacingMedium = 16.0;
@@ -19,13 +19,7 @@ class AppDimensions {
   static const double borderRadiusSmall = 4.0;
   static const double borderRadiusMedium = 8.0;
   static const double borderRadiusLarge = 16.0;
-  static const double borderRadiusCircle = 50.0; // For circular elements
-
-  // Font Sizes (Consider using TextTheme in AppTheme instead for consistency)
-  // static const double fontSmall = 12.0;
-  // static const double fontMedium = 14.0;
-  // static const double fontLarge = 16.0;
-  // static const double fontTitle = 22.0;
+  static const double borderRadiusCircle = 50.0; 
 
   // Button
   static const double buttonHeight = 48.0;

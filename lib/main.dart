@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shamil_web/app.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
-import 'package:flutter_web_plugins/flutter_web_plugins.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 
 Future<void> main() async {

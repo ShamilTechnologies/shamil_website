@@ -1,109 +1,424 @@
-import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart'; // For internationalization.
-import 'package:flutter_animate/flutter_animate.dart'; // For UI animations.
-import 'package:shamil_web/core/constants/app_dimensions.dart'; // For consistent spacing and sizing.
-import 'package:shamil_web/core/constants/app_strings.dart'; // For localized strings.
-// import 'package:shamil_web/core/constants/app_assets.dart'; // No longer needed directly for rocket in this version
-import 'package:responsive_framework/responsive_framework.dart'; // For responsive UI design.
+// lib/features/home/presentation/widgets/intro_section.dart
 
-// IntroSection: Now a StatelessWidget as rocket animation is handled separately.
-class IntroSection extends StatelessWidget {
+import 'dart:math' as math;
+import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:shamil_web/core/constants/app_dimensions.dart';
+import 'package:shamil_web/core/constants/app_strings.dart';
+import 'package:responsive_framework/responsive_framework.dart';
+
+/// 🌟 VIRAL SHAMIL INTRO SECTION 🌟
+/// Clean, flexible design with smooth animations and Shamil branding
+/// Optimized for eye comfort and viral appeal
+class IntroSection extends StatefulWidget {
   const IntroSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+  State<IntroSection> createState() => _IntroSectionState();
+}
 
-    // Ensure that the breakpoint names (MOBILE, TABLET) used here
-    // exactly match the 'name' property provided to the Breakpoint widgets
-    // in your ResponsiveBreakpoints.builder setup (usually in your MaterialApp).
-    // For example, if you used name: 'MOBILE_DEVICE' in the builder,
-    // you must use that same name/constant here.
-    // The responsive_framework package exports MOBILE, TABLET, DESKTOP constants.
-    final bool isMobile = ResponsiveBreakpoints.of(context).smallerOrEqualTo(MOBILE);
-    final bool isTablet = ResponsiveBreakpoints.of(context).between(MOBILE, TABLET);
+class _IntroSectionState extends State<IntroSection>
+    with TickerProviderStateMixin {
+  
+  // Simple animation controllers
+  late AnimationController _floatingController;
+  late AnimationController _glowController;
+  late AnimationController _entryController;
 
-    // Define text styles based on theme for good contrast.
-    // Using ?.copyWith is safe. If the base style (e.g., theme.textTheme.headlineLarge) is null,
-    // the result of titleStyle will be null, and Text(style: null) is valid (uses default style).
-    // However, ensure your theme (AppTheme.dart) defines these text styles.
-    final TextStyle? titleStyle = isMobile
-        ? theme.textTheme.headlineLarge?.copyWith(color: theme.colorScheme.onPrimary, fontSize: 30, fontWeight: FontWeight.bold)
-        : theme.textTheme.displayMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold);
+  @override
+  void initState() {
+    super.initState();
+    _initializeAnimations();
+  }
 
-    final TextStyle? descriptionStyle = theme.textTheme.titleLarge?.copyWith(
-      color: theme.colorScheme.onPrimary, // Text color is onPrimary (e.g., white on dark blue).
-      height: 1.7, // Line height for readability.
-      fontSize: isMobile ? 17 : (isTablet ? 19 : 21), // Responsive font size.
+  void _initializeAnimations() {
+    // Gentle floating animation
+    _floatingController = AnimationController(
+      duration: const Duration(seconds: 6),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    // Soft glow pulse
+    _glowController = AnimationController(
+      duration: const Duration(seconds: 4),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    // Entry animation
+    _entryController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
     );
 
-    // Fallback TextStyle if theme styles are somehow not defined properly.
-    const TextStyle fallbackTextStyle = TextStyle(color: Colors.red); // Visible error color
+    // Start entry animation
+    _entryController.forward();
+  }
 
-    // Outermost container: Sets the background color.
+  @override
+  void dispose() {
+    _floatingController.dispose();
+    _glowController.dispose();
+    _entryController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isMobile = ResponsiveBreakpoints.of(context).smallerOrEqualTo(MOBILE);
+    
     return Container(
-      // Ensure theme.colorScheme.primary is well-defined in both light and dark themes.
-      color: theme.colorScheme.primary, // Background color from theme.
-      // Padding widget defines the content area within the colored background.
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: AppDimensions.paddingPageHorizontal,
-          vertical: AppDimensions.paddingSectionVertical + (isMobile ? 10 : 40),
-        ),
-        // Main Content (Title and Description) - Centered within the padded area.
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1100), // Max width for content.
-            // Ensure AnimatedFadeIn is a correctly implemented custom widget if it's yours,
-            // or that it's used correctly if from a package.
-            child: Animate( // Replaced AnimatedFadeIn with direct flutter_animate for clarity
-              effects: [
-                FadeEffect(delay: 100.ms, duration: 500.ms), // Overall fade for the content block.
+      decoration: _buildShamildDecoration(theme),
+      child: AnimatedBuilder(
+        animation: Listenable.merge([_floatingController, _glowController]),
+        builder: (context, child) => _buildContent(theme, isMobile),
+      ),
+    );
+  }
+
+  /// Build Shamil-themed gradient background
+  BoxDecoration _buildShamildDecoration(ThemeData theme) {
+    return BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: theme.brightness == Brightness.light
+            ? [
+                const Color(0xFF2A548D).withOpacity(0.05), // Shamil blue very light
+                const Color(0xFFD8A31A).withOpacity(0.02), // Shamil gold very light
+                Colors.white,
+              ]
+            : [
+                const Color(0xFF1A2332), // Shamil dark surface
+                const Color(0xFF0F1419), // Shamil darker
+                Colors.black,
               ],
-              child: ResponsiveRowColumn(
-                layout: isMobile ? ResponsiveRowColumnType.COLUMN : ResponsiveRowColumnType.ROW,
-                rowCrossAxisAlignment: CrossAxisAlignment.center,
-                columnCrossAxisAlignment: CrossAxisAlignment.center,
-                columnSpacing: AppDimensions.spacingLarge,
-                rowSpacing: AppDimensions.paddingLarge * 2,
-                children: [
-                  // Title Column
-                  ResponsiveRowColumnItem(
-                    rowFlex: isTablet ? 3 : 2, // Flex factor for responsive layout.
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
-                      children: [
-                        // Ensure AppStrings.whatIsShamil is a valid key in your translation files.
-                        // If .tr() fails, it might display the key itself or cause issues if EasyLocalization isn't setup.
-                        Text(
-                          AppStrings.whatIsShamil.tr(), // Localized title.
-                          style: titleStyle ?? fallbackTextStyle, // Use fallback if titleStyle is null
-                          textAlign: isMobile ? TextAlign.center : TextAlign.start,
-                        ).animate().fadeIn(delay: 200.ms, duration: 600.ms).slideX(begin: -0.1, duration: 500.ms), // Entrance animation.
-                      ],
-                    ),
-                  ),
-                  // Description Column
-                  ResponsiveRowColumnItem(
-                    rowFlex: 3, // Flex factor for responsive layout.
-                    child: Padding(
-                      padding: EdgeInsets.only(top: isMobile ? AppDimensions.spacingMedium : 0),
-                      // Ensure AppStrings.introText is a valid key.
-                      child: Text(
-                        AppStrings.introText.tr(), // Localized description.
-                        style: descriptionStyle ?? fallbackTextStyle, // Use fallback
-                        textAlign: isMobile ? TextAlign.center : TextAlign.start,
-                      ).animate().fadeIn(delay: 350.ms, duration: 600.ms).slideX(begin: 0.1, duration: 500.ms), // Entrance animation.
-                      ),
-                    ),
-                  
-                ],
+      ),
+    );
+  }
+
+  /// Build main content with smooth animations
+  Widget _buildContent(ThemeData theme, bool isMobile) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppDimensions.paddingPageHorizontal,
+        vertical: isMobile ? 60 : 100,
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: ResponsiveRowColumn(
+            layout: isMobile ? ResponsiveRowColumnType.COLUMN : ResponsiveRowColumnType.ROW,
+            rowCrossAxisAlignment: CrossAxisAlignment.center,
+            columnCrossAxisAlignment: CrossAxisAlignment.center,
+            columnSpacing: isMobile ? 40 : 0,
+            rowSpacing: 80,
+            children: [
+              // Text Content
+              ResponsiveRowColumnItem(
+                rowFlex: 3,
+                child: _buildTextSection(theme, isMobile),
               ),
-            ),
+              
+              // Visual Element
+              ResponsiveRowColumnItem(
+                rowFlex: 2,
+                child: _buildViralVisual(theme, isMobile),
+              ),
+            ],
           ),
         ),
       ),
     );
+  }
+
+  /// Build text section with viral typography
+  Widget _buildTextSection(ThemeData theme, bool isMobile) {
+    return Column(
+      crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      children: [
+        // Badge
+        _buildViralBadge(theme).animate(delay: 200.ms)
+          .fadeIn(duration: 800.ms)
+          .slideY(begin: -0.2, curve: Curves.easeOutCubic),
+        
+        const SizedBox(height: 24),
+        
+        // Main Title
+        _buildMainTitle(theme, isMobile).animate(delay: 400.ms)
+          .fadeIn(duration: 1000.ms)
+          .slideY(begin: 0.2, curve: Curves.easeOutCubic),
+        
+        const SizedBox(height: 24),
+        
+        // Description
+        _buildDescription(theme, isMobile).animate(delay: 600.ms)
+          .fadeIn(duration: 1000.ms)
+          .slideY(begin: 0.2, curve: Curves.easeOutCubic),
+        
+        const SizedBox(height: 32),
+        
+        // Features
+        _buildFeatures(theme, isMobile).animate(delay: 800.ms)
+          .fadeIn(duration: 800.ms)
+          .slideY(begin: 0.2, curve: Curves.easeOutCubic),
+      ],
+    );
+  }
+
+  /// Build viral badge
+  Widget _buildViralBadge(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFF2A548D).withOpacity(0.1), // Shamil blue
+            const Color(0xFFD8A31A).withOpacity(0.1), // Shamil gold
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFF2A548D).withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: const BoxDecoration(
+              color: Color(0xFF2A548D),
+              shape: BoxShape.circle,
+            ),
+          ).animate(onPlay: (controller) => controller.repeat())
+           .scale(duration: 1000.ms, curve: Curves.easeInOut)
+           .then()
+           .scale(begin: const Offset(1.2, 1.2), end: const Offset(1.0, 1.0), duration: 1000.ms),
+          
+          const SizedBox(width: 12),
+          
+          Text(
+            "✨ Smart Service Platform",
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: const Color(0xFF2A548D),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build main title with Shamil gradient
+  Widget _buildMainTitle(ThemeData theme, bool isMobile) {
+    return ShaderMask(
+      shaderCallback: (bounds) => const LinearGradient(
+        colors: [
+          Color(0xFF2A548D), // Shamil blue
+          Color(0xFFD8A31A), // Shamil gold
+          Color(0xFF2A548D), // Back to blue
+        ],
+        stops: [0.0, 0.5, 1.0],
+      ).createShader(bounds),
+      child: Text(
+        AppStrings.whatIsShamil.tr(),
+        style: (isMobile 
+            ? theme.textTheme.displaySmall 
+            : theme.textTheme.displayMedium)?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          letterSpacing: -0.5,
+          height: 1.1,
+        ),
+        textAlign: isMobile ? TextAlign.center : TextAlign.start,
+      ),
+    );
+  }
+
+  /// Build eye-comfortable description
+  Widget _buildDescription(ThemeData theme, bool isMobile) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 600),
+      child: Text(
+        AppStrings.introText.tr(),
+        style: theme.textTheme.titleLarge?.copyWith(
+          color: theme.colorScheme.onSurface.withOpacity(0.8),
+          height: 1.6,
+          fontWeight: FontWeight.w400,
+        ),
+        textAlign: isMobile ? TextAlign.center : TextAlign.start,
+      ),
+    );
+  }
+
+  /// Build simple feature highlights
+  Widget _buildFeatures(ThemeData theme, bool isMobile) {
+    final features = [
+      {"icon": "⚡", "text": "Lightning Fast", "color": const Color(0xFF2A548D)},
+      {"icon": "🔒", "text": "Secure & Safe", "color": const Color(0xFFD8A31A)},
+      {"icon": "🎯", "text": "Smart AI", "color": const Color(0xFF2A548D)},
+    ];
+
+    return Wrap(
+      spacing: 16,
+      runSpacing: 16,
+      alignment: isMobile ? WrapAlignment.center : WrapAlignment.start,
+      children: features.asMap().entries.map((entry) {
+        final index = entry.key;
+        final feature = entry.value;
+        
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: (feature["color"] as Color).withOpacity(0.08),
+            borderRadius: BorderRadius.circular(25),
+            border: Border.all(
+              color: (feature["color"] as Color).withOpacity(0.2),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                feature["icon"] as String,
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                feature["text"] as String,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: feature["color"] as Color,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ).animate(delay: (1000 + index * 150).ms)
+         .fadeIn(duration: 600.ms)
+         .scale(begin: const Offset(0.8, 0.8), curve: Curves.easeOutBack);
+      }).toList(),
+    );
+  }
+
+  /// Build viral visual element
+  Widget _buildViralVisual(ThemeData theme, bool isMobile) {
+    return Transform.translate(
+      offset: Offset(0, math.sin(_floatingController.value * 2 * math.pi) * 8),
+      child: Container(
+        width: isMobile ? 280 : 350,
+        height: isMobile ? 280 : 350,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            colors: [
+              const Color(0xFF2A548D).withOpacity(0.1 + (_glowController.value * 0.1)),
+              const Color(0xFFD8A31A).withOpacity(0.05 + (_glowController.value * 0.05)),
+              Colors.transparent,
+            ],
+            stops: const [0.0, 0.7, 1.0],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF2A548D).withOpacity(0.1 + (_glowController.value * 0.1)),
+              blurRadius: 40 + (_glowController.value * 20),
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Rotating rings
+            ...List.generate(3, (index) => _buildRotatingRing(index)),
+            
+            // Center logo
+            _buildCenterLogo(theme, isMobile),
+          ],
+        ),
+      ),
+    ).animate(delay: 1000.ms)
+     .fadeIn(duration: 1200.ms)
+     .scale(begin: const Offset(0.8, 0.8), curve: Curves.easeOutCubic);
+  }
+
+  /// Build rotating ring
+  Widget _buildRotatingRing(int index) {
+    final size = 120.0 + (index * 60);
+    final rotationSpeed = 0.5 + (index * 0.3);
+    
+    return AnimatedBuilder(
+      animation: _floatingController,
+      builder: (context, child) {
+        return Transform.rotate(
+          angle: _floatingController.value * 2 * math.pi * rotationSpeed,
+          child: Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: index.isEven 
+                    ? const Color(0xFF2A548D).withOpacity(0.2)
+                    : const Color(0xFFD8A31A).withOpacity(0.2),
+                width: 2,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// Build center logo with Shamil branding
+  Widget _buildCenterLogo(ThemeData theme, bool isMobile) {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF2A548D),
+            Color(0xFFD8A31A),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF2A548D).withOpacity(0.3),
+            blurRadius: 20,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Center(
+        child: Text(
+          'S',
+          style: theme.textTheme.headlineMedium?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    ).animate(onPlay: (controller) => controller.repeat())
+     .scale(
+       begin: const Offset(1.0, 1.0), 
+       end: const Offset(1.1, 1.1), 
+       duration: 2000.ms,
+       curve: Curves.easeInOut,
+     )
+     .then()
+     .scale(
+       begin: const Offset(1.1, 1.1), 
+       end: const Offset(1.0, 1.0), 
+       duration: 2000.ms,
+       curve: Curves.easeInOut,
+     );
   }
 }

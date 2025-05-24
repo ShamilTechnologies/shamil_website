@@ -1,95 +1,204 @@
-import 'dart:math' as math; // Used for mathematical operations like min, max, and pi.
-import 'dart:ui' as ui; // For ImageFilter if needed, not directly for smoke particles
+// lib/features/home/presentation/widgets/enhanced_rocket_separator_section.dart
+import 'dart:math' as math;
+import 'dart:ui' as ui; // For ui.Gradient
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart'; // For Ticker
-// import 'package:easy_localization/easy_localization.dart'; // Not used in this widget
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shamil_web/core/constants/app_assets.dart';
 import 'package:shamil_web/core/constants/app_dimensions.dart';
 
-// Helper class for smoke particles
-class SmokeParticle {
-  Offset position;   // Current position of the particle on the canvas
-  double radius;     // Current radius of the particle
-  double opacity;    // Current opacity of the particle (0.0 to 1.0)
-  Offset velocity;   // Movement vector (dx, dy) per second
-  Duration lifetime; // How long this particle has existed
-  final Duration maxLifetime; // Maximum duration a particle can exist before disappearing
-  final double initialRadius; // Starting radius of the particle
-  final double maxRadius;     // Maximum radius the particle can grow to
+// --- Enhanced SmokeParticle Class ---
+// Defines the properties and behavior of each individual smoke particle.
+class EnhancedSmokeParticle {
+  // Initial configuration - set once when the particle is created.
+  final Offset initialPosition;
+  final double initialRadius;
+  final double maxRadius;
+  final Offset initialVelocity;
+  final Duration maxLifetime;
+  final double rotationSpeed;
+  final Color baseColor;
+  final bool useGradient;
 
-  SmokeParticle({
-    required this.position,
-    this.initialRadius = 3.0,     // Start a bit larger
-    this.maxRadius = 25.0,        // Particles can grow significantly larger
-    this.opacity = 0.8,           // Higher initial opacity for more visibility
-    required this.velocity,
-    this.maxLifetime = const Duration(milliseconds: 1800), // Particles last a bit longer
-  })  : radius = initialRadius,
-        lifetime = Duration.zero;
+  // Calculated final properties based on initial setup by the factory constructor.
+  final math.Random random;
+  final int puffCount;
+  final List<Offset> puffOffsets;
+  final List<double> puffRadiiMultipliers;
+  final List<double> puffOpacities;
 
-  // Updates the particle's state based on the time that has passed (timeDelta)
-  void update(Duration timeDelta) {
-    lifetime += timeDelta; // Increment lifetime
-    // Update position based on velocity and time delta (converted to seconds)
-    position += velocity * (timeDelta.inMilliseconds / 1000.0);
+  // Mutable state - these change over the particle's lifetime for animation.
+  Offset position;
+  double radius;
+  double opacity;
+  Duration lifetime;
+  Offset currentVelocity;
+  double rotation;
 
-    // Calculate how far along the particle is in its lifespan (0.0 to 1.0)
-    final double lifePercent = lifetime.inMilliseconds / maxLifetime.inMilliseconds;
+  EnhancedSmokeParticle._internal({
+    required this.initialPosition,
+    required this.initialRadius,
+    required this.maxRadius,
+    required double initialOpacityParam,
+    required this.initialVelocity,
+    required this.maxLifetime,
+    required this.rotationSpeed,
+    required this.baseColor,
+    required this.useGradient,
+    required this.random,
+    required this.puffCount,
+    required this.puffOffsets,
+    required this.puffRadiiMultipliers,
+    required this.puffOpacities,
+    required double initialRotation,
+  })  : position = initialPosition,
+        radius = initialRadius,
+        opacity = initialOpacityParam,
+        lifetime = Duration.zero,
+        currentVelocity = initialVelocity,
+        rotation = initialRotation;
 
-    // Opacity fades from the initial opacity down to 0 over its lifetime
-    opacity = math.max(0, (1.0 - lifePercent) * 0.8); // Using initial opacity for fade calculation
+  factory EnhancedSmokeParticle({
+    required Offset position,
+    double initialRadius = 4.0,
+    double maxRadius = 35.0,
+    double initialOpacity = 0.0,
+    required Offset velocity,
+    Duration maxLifetime = const Duration(milliseconds: 2500),
+    double rotationSpeed = 0.0,
+    Color baseColor = Colors.white,
+    bool useGradient = true,
+  }) {
+    final randomInstance = math.Random();
+    final puffCountValue = 3 + randomInstance.nextInt(3);
 
-    // Radius grows from initialRadius to maxRadius over its lifetime
-    // Using math.min to ensure it doesn't exceed maxRadius due to floating point issues
-    radius = initialRadius + (maxRadius - initialRadius) * math.min(1.0, lifePercent);
+    final puffOffsetsValue = List.generate(
+        puffCountValue,
+        (index) => Offset(
+            (randomInstance.nextDouble() - 0.5) * maxRadius * 0.3,
+            (randomInstance.nextDouble() - 0.5) * maxRadius * 0.3));
+    final puffRadiiMultipliersValue = List.generate(
+        puffCountValue, (index) => 0.5 + randomInstance.nextDouble() * 0.5);
+    final puffOpacitiesValue = List.generate(
+        puffCountValue, (index) => 0.5 + randomInstance.nextDouble() * 0.3);
+    final initialRotationValue = (randomInstance.nextDouble() - 0.5) * math.pi;
+
+    return EnhancedSmokeParticle._internal(
+      initialPosition: position,
+      initialRadius: initialRadius,
+      maxRadius: maxRadius,
+      initialOpacityParam: initialOpacity,
+      initialVelocity: velocity,
+      maxLifetime: maxLifetime,
+      rotationSpeed: rotationSpeed,
+      baseColor: baseColor,
+      useGradient: useGradient,
+      random: randomInstance,
+      puffCount: puffCountValue,
+      puffOffsets: puffOffsetsValue,
+      puffRadiiMultipliers: puffRadiiMultipliersValue,
+      puffOpacities: puffOpacitiesValue,
+      initialRotation: initialRotationValue,
+    );
   }
 
-  // A particle is considered "dead" if its lifetime exceeds maxLifetime or its opacity is zero or less.
-  bool get isDead => lifetime >= maxLifetime || opacity <= 0;
+  void update(Duration timeDelta) {
+    lifetime += timeDelta;
+    position += currentVelocity * (timeDelta.inMilliseconds / 1000.0);
+    rotation += rotationSpeed * (timeDelta.inMilliseconds / 1000.0);
+    final double lifePercent = lifetime.inMilliseconds / maxLifetime.inMilliseconds;
+
+    if (lifePercent < 0.15) {
+      opacity = math.min(1.0, lifePercent / 0.15) * 0.7;
+    } else if (lifePercent < 0.7) {
+      opacity = 0.7 - (lifePercent - 0.15) * 0.3;
+    } else {
+      double startOpacityForFadeOut = 0.7 - (0.55 * 0.3); // Opacity at 70% life
+      opacity = math.max(0, startOpacityForFadeOut * (1.0 - (lifePercent - 0.7) / 0.3) );
+    }
+    radius = initialRadius + (maxRadius - initialRadius) * (1 - math.pow(1 - math.min(1.0, lifePercent), 2)).toDouble();
+    currentVelocity = Offset(currentVelocity.dx * 0.97, currentVelocity.dy * 0.97 - 0.8);
+  }
+
+  bool get isDead => lifetime >= maxLifetime || opacity <= 0.005;
 }
 
+// CustomPainter to draw the smoke particles.
+class EnhancedSmokePainter extends CustomPainter {
+  final List<EnhancedSmokeParticle> particles;
+  // Removed glowColor as the rocket itself doesn't have a separate glow anymore,
+  // and collective smoke glow was also removed for simplicity.
+  // final Color? glowColor; 
 
-class RocketSeparatorSection extends StatefulWidget {
-  final ScrollController scrollController;
-
-  const RocketSeparatorSection({
-    super.key,
-    required this.scrollController,
-  });
+  EnhancedSmokePainter({required this.particles /*, this.glowColor*/});
 
   @override
-  State<RocketSeparatorSection> createState() => _RocketSeparatorSectionState();
+  void paint(Canvas canvas, Size size) {
+    final Paint gradientPaint = Paint();
+    final Paint simplePaint = Paint()..style = PaintingStyle.fill;
+
+    for (final particle in particles) {
+      if (particle.opacity <= 0) continue;
+      canvas.save();
+      canvas.translate(particle.position.dx, particle.position.dy);
+      canvas.rotate(particle.rotation);
+
+      if (particle.useGradient) {
+        final shader = ui.Gradient.radial(
+          Offset.zero, particle.radius,
+          [
+            particle.baseColor.withOpacity(particle.opacity * 0.75),
+            particle.baseColor.withOpacity(particle.opacity * 0.45),
+            particle.baseColor.withOpacity(particle.opacity * 0.1),
+            Colors.transparent,
+          ],
+          [0.0, 0.3, 0.7, 1.0],
+        );
+        gradientPaint.shader = shader;
+        gradientPaint.style = PaintingStyle.fill;
+        gradientPaint.maskFilter = MaskFilter.blur(BlurStyle.normal, particle.radius * 0.4);
+        canvas.drawCircle(Offset.zero, particle.radius, gradientPaint);
+      } else {
+        simplePaint.color = particle.baseColor.withOpacity(particle.opacity);
+        simplePaint.maskFilter = MaskFilter.blur(BlurStyle.normal, particle.radius * 0.3);
+        canvas.drawCircle(Offset.zero, particle.radius, simplePaint);
+      }
+      canvas.restore();
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant EnhancedSmokePainter oldDelegate) => true;
 }
 
-class _RocketSeparatorSectionState extends State<RocketSeparatorSection> with SingleTickerProviderStateMixin {
+// The main widget for the rocket separator section.
+class EnhancedRocketSeparatorSection extends StatefulWidget {
+  final ScrollController scrollController;
+  const EnhancedRocketSeparatorSection({super.key, required this.scrollController});
+  @override
+  State<EnhancedRocketSeparatorSection> createState() => _EnhancedRocketSeparatorSectionState();
+}
+
+class _EnhancedRocketSeparatorSectionState extends State<EnhancedRocketSeparatorSection> with SingleTickerProviderStateMixin {
   double _rocketHorizontalPercent = 0.0;
   final GlobalKey _separatorKey = GlobalKey();
-
-  List<SmokeParticle> _smokeParticles = [];
+  final List<EnhancedSmokeParticle> _smokeParticles = [];
   Ticker? _ticker;
   double _previousRocketHorizontalPercent = 0.0;
-  Duration? _lastElapsed; // To calculate deltaTime for particle updates
+  Duration? _lastElapsed;
 
   // *** ROCKET SIZE CONTROL ***
-  static const double rocketImageSize = 90.0; // Size of the rocket image
+  static const double rocketImageSize = 90.0; // Current size
 
   @override
   void initState() {
     super.initState();
     widget.scrollController.addListener(_onScroll);
-
-    _ticker = createTicker((elapsed) { // 'elapsed' is total time ticker has been running
-      if (mounted) {
-        _updateSmokeParticles(elapsed);
-      }
-    });
-    _ticker?.start();
-
+    _ticker = createTicker((elapsed) {
+      if (mounted) _updateSmokeParticles(elapsed);
+    })..start();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _onScroll(); // Initial scroll check to set rocket position
-      }
+      if (mounted) _onScroll();
     });
   }
 
@@ -102,19 +211,19 @@ class _RocketSeparatorSectionState extends State<RocketSeparatorSection> with Si
 
   void _onScroll() {
     if (!mounted || _separatorKey.currentContext == null) return;
-
     final RenderBox? separatorRenderBox = _separatorKey.currentContext!.findRenderObject() as RenderBox?;
     if (separatorRenderBox == null) return;
 
     final separatorOffset = separatorRenderBox.localToGlobal(Offset.zero);
-    final separatorHeight = separatorRenderBox.size.height;
+    final separatorHeight = separatorRenderBox.size.height; // Height of the separator strip
     final screenHeight = MediaQuery.of(context).size.height;
 
     // --- SCROLL ANIMATION SPEED CONTROL (Horizontal Movement) ---
-    // These values determine the scroll range over which the rocket moves from left to right.
-    // A larger difference between scrollEndPoint and scrollStartPoint makes the animation slower.
-    final scrollStartPoint = separatorOffset.dy - (screenHeight * 1.5);
-    final scrollEndPoint = separatorOffset.dy + separatorHeight + (screenHeight * 1.5);
+    // To make the animation very slow, increase the difference between scrollEndPoint and scrollStartPoint.
+    // This means the rocket animates over a larger scroll distance.
+    // Example: Animate over approximately 5 times the screen height.
+    final scrollStartPoint = separatorOffset.dy - (screenHeight * 2.5); // Start even earlier
+    final scrollEndPoint = separatorOffset.dy + separatorHeight + (screenHeight * 2.5); // End even later
 
     final currentScroll = widget.scrollController.offset;
     double progress = 0.0;
@@ -126,151 +235,154 @@ class _RocketSeparatorSectionState extends State<RocketSeparatorSection> with Si
     } else if (currentScroll >= scrollEndPoint) {
       progress = 1.0;
     }
-
     final newRocketHorizontalPercent = math.min(1.0, math.max(0.0, progress));
 
-    // Emit smoke only if the rocket has moved to the right.
-    // The threshold (0.001) prevents too many emissions for tiny movements.
-    // (newRocketHorizontalPercent > _previousRocketHorizontalPercent + 0.001) checks for rightward movement.
     if ((newRocketHorizontalPercent > _previousRocketHorizontalPercent + 0.001) && newRocketHorizontalPercent > 0.005) {
-      _emitSmoke();
+      final speedFactor = (newRocketHorizontalPercent - _previousRocketHorizontalPercent);
+      final particleCount = math.min(5, 1 + (speedFactor * 30).toInt()); // Max 5 particles
+      _emitSmoke(particleCount);
+    } else if (_rocketHorizontalPercent > 0.01 && _smokeParticles.isEmpty && math.Random().nextDouble() < 0.02) { // Very low chance for idle smoke
+      _emitSmoke(1);
     }
-
     setState(() {
       _rocketHorizontalPercent = newRocketHorizontalPercent;
       _previousRocketHorizontalPercent = newRocketHorizontalPercent;
     });
   }
 
-  // --- Smoke Emission Logic ---
-  void _emitSmoke() {
+  void _emitSmoke(int count) {
     if (!mounted) return;
     final screenWidth = MediaQuery.of(context).size.width;
+    final random = math.Random();
+    final theme = Theme.of(context);
 
-    // Calculate rocket's current visual center X within the padded travel area
     final double travelAreaWidth = screenWidth - (AppDimensions.paddingPageHorizontal * 2);
     final double maxRocketTravelDistance = travelAreaWidth - rocketImageSize;
     final double rocketCurrentLeftEdgeInTravelArea = (_rocketHorizontalPercent * maxRocketTravelDistance);
     final double rocketCenterXInTravelArea = rocketCurrentLeftEdgeInTravelArea + (rocketImageSize / 2);
-    // Convert to global X for particle positioning
     final double globalRocketCenterX = AppDimensions.paddingPageHorizontal + rocketCenterXInTravelArea;
 
-    // Calculate rocket's visual center Y relative to the top of the Stack (which is the separator strip)
-    // Separator strip height is rocketImageSize / 2.
-    // Rocket's 'bottom' is set by the Positioned widget. We need its center Y for smoke.
-    // If bottom is rocketImageSize * 0.1, then bottom edge is 0.1 * H from stack bottom.
-    // Center Y is (stack height) - (bottom offset) - (half rocket height)
-    final double separatorStripHeight = rocketImageSize / 2;
-    // This calculation of rocketCenterY is relative to the top of the Stack.
-    // If rocket's bottom is at `rocketImageSize * 0.1` from the Stack's bottom,
-    // then its top is at `separatorStripHeight - (rocketImageSize * 0.1) - rocketImageSize`.
-    // Its center Y is `separatorStripHeight - (rocketImageSize * 0.1) - (rocketImageSize / 2)`.
-    final double rocketCenterY = separatorStripHeight - (rocketImageSize * 0.1) - (rocketImageSize / 2);
+    // --- ROCKET Y POSITION FOR SMOKE EMISSION ---
+    // The rocket's 'bottom' is now -rocketImageSize * 0.2 from the bottom of the Stack (separator strip).
+    // We need the rocket's visual center Y relative to the top of the Stack.
+    final double separatorStripHeight = rocketImageSize * 0.25; // Height of the separator strip
+    // If rocket's bottom is at `-rocketImageSize * 0.2` from Stack's bottom,
+    // its top is at `separatorStripHeight - (-rocketImageSize * 0.2) - rocketImageSize`.
+    // Its center Y is `separatorStripHeight - (-rocketImageSize * 0.2) - (rocketImageSize / 2)`.
+    final double rocketCenterY = separatorStripHeight + (rocketImageSize * 0.2) - (rocketImageSize / 2);
 
 
-    // Emitting from the visual left and vertical center of the rocket.
-    const double emissionOffsetXMultiplier = -0.4; // Negative for left of rocket center
-    final double emissionOffsetX = rocketImageSize * emissionOffsetXMultiplier;
+    // --- EMISSION POINT: Upper-behind-left of the rocket ---
+    final double emissionOffsetX = -rocketImageSize * 0.40; // Slightly less behind
+    final double emissionOffsetY = -rocketImageSize * 0.20; // More distinctly above rocket's Y center
 
-    final random = math.Random();
-    for (int i = 0; i < 3; i++) { // Emit a few particles for a denser look
+    final List<Color> smokeColors = [
+      Colors.grey.shade100, Colors.grey.shade200,
+      theme.colorScheme.onSurface.withOpacity(0.2),
+    ];
+
+    for (int i = 0; i < count; i++) {
       _smokeParticles.add(
-        SmokeParticle(
+        EnhancedSmokeParticle(
           position: Offset(
-            globalRocketCenterX + emissionOffsetX + (random.nextDouble() - 0.5) * 15, // Add horizontal spread
-            rocketCenterY + (random.nextDouble() - 0.5) * 10, // Add vertical spread around center Y
+            globalRocketCenterX + emissionOffsetX + (random.nextDouble() - 0.5) * 20,
+            rocketCenterY + emissionOffsetY + (random.nextDouble() - 0.5) * 15,
           ),
           velocity: Offset(
-            -(random.nextDouble() * 15 + 15), // Increased leftward drift
-            -(random.nextDouble() * 20 + 15), // Increased upward drift
+            -(random.nextDouble() * 10 + 15), // Slower backward thrust for slower rocket
+            -(random.nextDouble() * 15 + 15), // Slower upward thrust
           ),
+          initialRadius: 3.0 + random.nextDouble() * 4.0,
+          maxRadius: 22.0 + random.nextDouble() * 18.0, // Slightly smaller max for realism
+          rotationSpeed: (random.nextDouble() - 0.5) * 2.0,
+          maxLifetime: Duration(milliseconds: 1600 + random.nextInt(1000)), // 1.6s to 2.6s
+          baseColor: smokeColors[random.nextInt(smokeColors.length)],
+          useGradient: random.nextDouble() > 0.15,
+          initialOpacity: 0.0,
         ),
       );
     }
+    if (_smokeParticles.length > 70) { // Reduced max particles
+      _smokeParticles.removeRange(0, _smokeParticles.length - 70);
+    }
   }
 
-  // --- Update Smoke Particles (called by Ticker) ---
   void _updateSmokeParticles(Duration elapsed) {
     if (!mounted) return;
     final Duration deltaTime = elapsed - (_lastElapsed ?? elapsed);
     _lastElapsed = elapsed;
-
-    List<SmokeParticle> nextGenerationParticles = [];
-    for (var p in _smokeParticles) {
+    _smokeParticles.removeWhere((p) {
       p.update(deltaTime);
-      if (!p.isDead) {
-        nextGenerationParticles.add(p);
-      }
-    }
-    _smokeParticles = nextGenerationParticles;
-
-    if (_smokeParticles.isNotEmpty || _previousRocketHorizontalPercent > 0) {
-       setState(() {});
+      return p.isDead;
+    });
+    if (_smokeParticles.isNotEmpty) {
+      setState(() {});
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
-
     final double travelAreaWidth = screenWidth - (AppDimensions.paddingPageHorizontal * 2);
     final double maxRocketTravelDistance = travelAreaWidth - rocketImageSize;
     final double rocketLeftPosition = AppDimensions.paddingPageHorizontal + (_rocketHorizontalPercent * maxRocketTravelDistance);
+    
+    // --- SEPARATOR STRIP HEIGHT CONTROL ---
+    // Make the separator strip very thin, almost invisible, so the rocket truly floats between sections.
+    // The rocket will be positioned relative to this.
+    final double separatorStripHeight = rocketImageSize * 0.25; // Reduced further
 
-    final double separatorStripHeight = rocketImageSize / 2;
+    Widget rocketImageWithIdleAnimation = Image.asset(
+      AppAssets.rocketImagePng,
+      width: rocketImageSize,
+      height: rocketImageSize,
+      fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) {
+        return Icon(
+          Icons.rocket_launch_outlined,
+          size: rocketImageSize,
+          color: theme.colorScheme.onSurface.withOpacity(0.5),
+        );
+      },
+    ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+       .moveY(end: -2.0, duration: 3000.ms, curve: Curves.easeInOutSine) // Even subtler bob
+       .then(delay: 3000.ms)
+       .moveY(end: 2.0, duration: 3000.ms, curve: Curves.easeInOutSine)
+       .then(delay: 250.ms)
+       .shake(hz: 0.7, duration: 6000.ms, rotation: 0.01); // Very subtle and slow shake
 
     return Container(
       key: _separatorKey,
-      height: separatorStripHeight,
+      height: separatorStripHeight, // The visible height of the separator strip
       width: double.infinity,
-      color: theme.colorScheme.background,
+      color: theme.colorScheme.surface, // Background of the separator strip
       child: Stack(
-        clipBehavior: Clip.none,
+        clipBehavior: Clip.none, // Allow rocket and smoke to draw outside these bounds
         children: [
+          // Smoke is painted first, so it's behind the rocket
           Positioned.fill(
             child: CustomPaint(
-              painter: SmokePainter(
-                particles: _smokeParticles,
-              ),
+              painter: EnhancedSmokePainter(particles: _smokeParticles),
             ),
           ),
-
+          // Rocket image, positioned and rotated
           Positioned(
             left: rocketLeftPosition,
             // *** ROCKET VERTICAL POSITION CONTROL ***
             // This 'bottom' value positions the bottom edge of the rocket image
             // relative to the bottom edge of this Stack (the separator strip).
-            // - A value of 0: Rocket's bottom edge sits exactly on the bottom of the separator strip.
-            // - A positive value (e.g., rocketImageSize * 0.1): Moves the rocket UP.
-            //   The bottom of the rocket will be 10% of its height ABOVE the bottom of the strip.
-            // - A negative value (e.g., -rocketImageSize * 0.1): Moves the rocket DOWN.
-            //   The bottom of the rocket will be 10% of its height BELOW the bottom of the strip (overlapping section below).
-            // To make it "a little down" from the previous (0.25), let's try 0.1 or 0.05.
-            bottom: rocketImageSize * 0.1, // Rocket's bottom is 10% of its height above the separator's bottom.
+            // A negative value makes it hang below the strip.
+            // To make it appear "more up" from the absolute bottom of the page (between sections),
+            // and considering the strip is now very short, we might want its center
+            // to be roughly on the strip, or its bottom edge slightly below.
+            bottom: -rocketImageSize * 0.2, // Rocket hangs slightly below the thin separator strip
 
             child: Transform.rotate(
-              angle: -math.pi *1.77, // Points right and very slightly up
-              child: Image.asset(
-                AppAssets.rocketImagePng,
-                width: rocketImageSize,
-                height: rocketImageSize,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  return Icon(
-                    Icons.rocket_launch_outlined,
-                    size: rocketImageSize,
-                    color: theme.colorScheme.onSurface.withOpacity(0.5),
-                  );
-                },
-              ).animate(
-                 onPlay: (controller) => controller.repeat(reverse: true),
-              ).shake(hz: 1.2, duration: 5000.ms, rotation: 0.02)
-               .then(delay: 2500.ms)
-               .moveY(end: -3, duration: 2500.ms, curve: Curves.easeInOutSine)
-               .then(delay:2500.ms)
-               .moveY(end: 3, duration: 2500.ms, curve: Curves.easeInOutSine),
+              // *** ROCKET ROTATION CONTROL ***
+              // Angle to make the rocket point to the right and slightly up.
+              angle: -math.pi *1.77, // Approx -90 + 8 = -82 degrees
+              child: rocketImageWithIdleAnimation,
             ),
           ),
         ],
@@ -279,27 +391,52 @@ class _RocketSeparatorSectionState extends State<RocketSeparatorSection> with Si
   }
 }
 
-// --- Custom Painter for Smoke ---
+// --- Enhanced SmokePainter ---
+// (SmokePainter class remains largely the same as the previous version, 
+// focusing on drawing particles with gradients and rotation)
 class SmokePainter extends CustomPainter {
-  final List<SmokeParticle> particles;
+  final List<EnhancedSmokeParticle> particles;
 
   SmokePainter({required this.particles});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
+    final Paint gradientPaint = Paint();
 
     for (final particle in particles) {
-      paint.color = Colors.grey.shade300.withOpacity(particle.opacity * 0.5);
-      canvas.drawCircle(particle.position, particle.radius, paint);
+      if (particle.opacity <= 0) continue;
 
-      paint.color = Colors.grey.shade400.withOpacity(particle.opacity * 0.7);
-      canvas.drawCircle(particle.position, particle.radius * 0.6, paint);
+      canvas.save();
+      canvas.translate(particle.position.dx, particle.position.dy);
+      canvas.rotate(particle.rotation);
+
+      if (particle.useGradient) {
+        final shader = ui.Gradient.radial(
+          Offset.zero,
+          particle.radius,
+          [ 
+            Colors.white.withOpacity(particle.opacity * 0.8),       
+            Colors.grey.shade300.withOpacity(particle.opacity * 0.5), 
+            Colors.grey.shade400.withOpacity(particle.opacity * 0.2), 
+            Colors.transparent,                                     
+          ],
+          [0.0, 0.25, 0.6, 1.0], 
+        );
+        gradientPaint.shader = shader;
+        gradientPaint.style = PaintingStyle.fill;
+        gradientPaint.maskFilter = MaskFilter.blur(BlurStyle.normal, particle.radius * 0.5);
+        canvas.drawCircle(Offset.zero, particle.radius, gradientPaint);
+      } else { 
+        final simplePaint = Paint()
+            ..color = particle.baseColor.withOpacity(particle.opacity)
+            ..style = PaintingStyle.fill
+            ..maskFilter = MaskFilter.blur(BlurStyle.normal, particle.radius * 0.3);
+        canvas.drawCircle(Offset.zero, particle.radius, simplePaint);
+      }
+      canvas.restore();
     }
   }
 
   @override
-  bool shouldRepaint(covariant SmokePainter oldDelegate) {
-    return true;
-  }
+  bool shouldRepaint(covariant EnhancedSmokePainter oldDelegate) => true;
 }

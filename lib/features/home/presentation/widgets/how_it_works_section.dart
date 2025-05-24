@@ -91,7 +91,7 @@ class HowItWorksSection extends StatelessWidget {
     final bool isMobile = ResponsiveBreakpoints.of(context).smallerOrEqualTo(MOBILE);
 
     return Container(
-      color: theme.colorScheme.background, // Use main background or surface
+      color: theme.colorScheme.surface, // Use main background or surface
       padding: const EdgeInsets.symmetric(
           horizontal: AppDimensions.paddingPageHorizontal,
           vertical: AppDimensions.paddingSectionVertical),
@@ -163,7 +163,7 @@ class HowItWorksSection extends StatelessWidget {
           const SizedBox(height: AppDimensions.spacingMedium),
           Text(titleKey.tr(), style: theme.textTheme.titleLarge, textAlign: TextAlign.center),
           const SizedBox(height: AppDimensions.spacingSmall),
-          Text(descKey.tr(), style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onBackground.withOpacity(0.8)), textAlign: TextAlign.center),
+          Text(descKey.tr(), style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.8)), textAlign: TextAlign.center),
         ],
       ),
     );

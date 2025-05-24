@@ -1,30 +1,49 @@
 name: shamil_web
-description: "A new Flutter project."
+description: "Enhanced Shamil Web - Viral UI/UX design for service booking platform"
 publish_to: 'none'
-version: 0.1.0
+version: 1.0.0+1
 
 environment:
   sdk: ^3.7.2
 
 dependencies:
-  easy_localization: ^3.0.5
-  firebase_analytics: ^11.0.0
-  firebase_core: ^3.1.0
-  flip_card: ^0.7.0
+  # Core Flutter
   flutter:
     sdk: flutter
-  flutter_animate: ^4.5.0
   flutter_localizations:
     sdk: flutter
+
+  # State Management
   flutter_riverpod: ^2.5.1
-  flutter_svg: ^2.0.10+1
-  gap: ^3.0.1
+
+  # Internationalization
+  easy_localization: ^3.0.5
+
+  # Navigation
   go_router: ^14.0.0
-  google_fonts: ^6.2.1
-  lottie: ^3.3.1
+
+  # UI Enhancement
+  flutter_animate: ^4.5.0
   responsive_framework: ^1.4.0
-  url_launcher: ^6.2.6
+  gap: ^3.0.1
+
+  # Graphics and Fonts
+  google_fonts: ^6.2.1
+  flutter_svg: ^2.0.10+1
+  lottie: ^3.3.1
+
+  # Interactive Elements
+  flip_card: ^0.7.0
+
+  # Media
   video_player: ^2.7.0
+
+  # Utils
+  url_launcher: ^6.2.6
+
+  # Firebase (Optional - for analytics)
+  firebase_core: ^3.1.0
+  firebase_analytics: ^11.0.0
 
 dev_dependencies:
   flutter_lints: ^5.0.0
@@ -33,9 +52,37 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  
+  # Enhanced Assets Organization
   assets:
-    - assets\translations\en.json
-    - assets\translations\ar.json
+    # Translations
+    - assets/translations/
+    
+    # Images
     - assets/images/
-    - assets/videos/intro.mp4
-    - assets/lottie/ 
+    - assets/icons/
+
+
+
+    
+    # Animations
+    - assets/lottie/
+    
+    # Videos
+    - assets/videos/
+    
+    # Fonts (if using custom fonts)
+    - assets/fonts/
+
+  # Custom fonts configuration (optional)
+  # fonts:
+  #   - family: CustomFont
+  #     fonts:
+  #       - asset: assets/fonts/CustomFont-Regular.ttf
+  #       - asset: assets/fonts/CustomFont-Bold.ttf
+  #         weight: 700
+
+# Additional configuration for web builds
+flutter_web:
+  # Enable web renderer for better performance
+  use_skia: true

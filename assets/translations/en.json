@@ -8,16 +8,27 @@
   "joinProvider": "Join as Provider",
   "whatIsShamil": "What is Shamil App?",
   "introText": "Shamil App is a smart platform connecting users with service providers. Book appointments, manage schedules, and handle payments securely, all in one place.",
+  
   "forUsersTitle": "For Users",
   "forUsersBenefit1": "Easy Booking: Find and book services in seconds.",
   "forUsersBenefit2": "Secure Payments: Pay instantly and securely.",
   "forUsersBenefit3": "Manage Bookings: Keep track of your appointments.",
   "forUsersBenefit4": "Discover Nearby: Find services near your location.",
+  
   "forProvidersTitle": "For Service Providers",
   "forProvidersBenefit1": "Automated Bookings: Manage appointments effortlessly.",
   "forProvidersBenefit2": "Client Management: Keep track of your customers.",
   "forProvidersBenefit3": "Payment Tracking: Monitor revenue and payments.",
   "forProvidersBenefit4": "Grow Your Base: Reach more potential customers.",
+  
+  "_comment_eye_friendly_benefits": "⭐ NEW: Eye-Friendly Benefits Section ⭐",
+  "whyChooseShamil": "Why Choose Shamil?",
+  "flipCardsToDiscover": "Flip the cards to discover amazing benefits!",
+  "perfectForUsers": "🎯 Perfect for Users!\nExperience seamless service booking with smart features designed just for you.",
+  "boostYourBusiness": "🚀 Boost Your Business!\nGrow faster with intelligent tools that help you manage and expand your services.",
+  "tapToFlip": "Tap to flip",
+  "tapAgainToFlipBack": "Tap again to flip back",
+  
   "featuresTitle": "App Features",
   "featureBooking": "Seamless Booking",
   "featurePayment": "Instant Payments",
@@ -25,6 +36,7 @@
   "featureNotifications": "Real-time Notifications",
   "featureLocation": "Location Discovery",
   "featurePerformance": "Fast & Reliable",
+  
   "howItWorksTitle": "How It Works",
   "step1Title": "Find",
   "step1Desc": "Search for services near you.",
@@ -32,38 +44,65 @@
   "step2Desc": "Choose a time and book instantly.",
   "step3Title": "Enjoy",
   "step3Desc": "Manage your booking and enjoy the service.",
+  
   "appPreviewTitle": "See Shamil in Action",
+  "previewSectionTitle": "Shamil: Smart, Simple, Secure.",
+  "previewSectionSubtitle": "The best app for all your service needs! 100s of services divided by category. Book, manage, and pay with ease.",
+  "previewTryForFree": "Try for Free",
+  "previewShowMore": "Show More",
+  
+  "mobileAppPagesTitle": "Experience Shamil Mobile",
+  "mobileAppPagesSubtitle": "Scan your face to see it in its full glory",
+  "scanDiscoverTitle": "Scan & Discover",
+  "scanDiscoverSubtitle": "Find perfect services",
+  "bookInstantlyTitle": "Book Instantly",
+  "bookInstantlySubtitle": "One-tap booking",
+  "securePaymentTitle": "Secure Payment",
+  "securePaymentSubtitle": "Safe & fast transactions",
+  "faceRecognitionFeature": "Face Recognition",
+  "smartMatchingFeature": "Smart Matching",
+  "instantResultsFeature": "Instant Results",
+  "realTimeSlotsFeature": "Real-time Slots",
+  "smartCalendarFeature": "Smart Calendar",
+  "quickBookingFeature": "Quick Booking",
+  "multipleMethodsFeature": "Multiple Methods",
+  "instantTransferFeature": "Instant Transfer",
+  "secureWalletFeature": "Secure Wallet",
+  "getStartedButton": "Get Started",
+  "experienceFutureTitle": "Ready to experience the future?",
+  "downloadTransformText": "Download Shamil App and transform how you book services",
+  
+  "shamilShowcaseTitle": "Experience Shamil in Action",
+  "shamilShowcaseDescription": "Discover how Shamil transforms your service booking experience with intelligent features and seamless interface design.",
+  
   "testimonialsTitle": "What Users Say",
+  "testimonial1CompanyName": "TechNova Solutions",
+  "testimonial1Text": "\"Shamil App is a game-changer! The service booking is incredibly smooth, and the interface is super easy to use, even for beginners. Definitely a must-try!\"",
+  "testimonial1UserName": "Ben Harris",
+  "testimonial1UserTitle": "Product Manager",
+  
+  "testimonial2CompanyName": "Shopify Experts Co.",
+  "testimonial2Text": "\"I'm impressed with how detailed and reliable the provider dashboard is. Shamil App does most of the work, making client management effortless. Fantastic tool!\"",
+  "testimonial2UserName": "Michael Chenn",
+  "testimonial2UserTitle": "E-commerce Consultant",
+  
+  "testimonial3CompanyName": "ApexStudios Creative",
+  "testimonial3Text": "\"I've tried multiple booking platforms, but Shamil App takes it to the next level. The speed, clarity, and payment system are unmatched. Perfect for our studio!\"",
+  "testimonial3UserName": "Ravi Patel",
+  "testimonial3UserTitle": "Creative Director",
+  
   "footerContact": "Contact Us",
   "footerPrivacy": "Privacy Policy",
   "footerTerms": "Terms of Service",
+  "allRightsReserved": "All rights reserved",
+  
   "language": "Language",
   "english": "English",
   "arabic": "العربية",
+  
   "GetShamilAppTitle": "Get Shamil Today!",
   "getShamilAppSubtitle": "Experience seamless service booking and management at your fingertips.",
-  "testimonial1Text": "\"Shamil App made booking my gym sessions incredibly easy!\"",
   "testimonial1Author": "- Jane Doe, User",
   "getStartedWithShamil": "Get started with the smartest way to manage services.",
- 
-"testimonial1CompanyName": "TechNova Solutions",
-"testimonial1Text": "\"Shamil App is a game-changer! The service booking is incredibly smooth, and the interface is super easy to use, even for beginners. Definitely a must-try!\"",
-"testimonial1UserName": "Ben Harris",
-"testimonial1UserTitle": "Product Manager",
-
-"testimonial2CompanyName": "Shopify Experts Co.",
-"testimonial2Text": "\"I'm impressed with how detailed and reliable the provider dashboard is. Shamil App does most of the work, making client management effortless. Fantastic tool!\"",
-"testimonial2UserName": "Michael Chenn",
-"testimonial2UserTitle": "E-commerce Consultant",
-
-"testimonial3CompanyName": "ApexStudios Creative",
-"testimonial3Text": "\"I've tried multiple booking platforms, but Shamil App takes it to the next level. The speed, clarity, and payment system are unmatched. Perfect for our studio!\"",
-"testimonial3UserName": "Ravi Patel",
-"testimonial3UserTitle": "Creative Director",
-
-"previewSectionTitle": "Shamil: Smart, Simple, Secure.",
-  "previewSectionSubtitle": "The best app for all your service needs! 100s of services divided by category. Book, manage, and pay with ease.",
-  "previewTryForFree": "Try for Free",
-  "previewShowMore": "Show More"
-
+  "learnMoreAbout": "Learn more about"
 }

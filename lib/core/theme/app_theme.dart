@@ -22,13 +22,11 @@ class AppTheme {
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary, // Dark Blue
         secondary: AppColors.primaryGold, // Gold
-        surface: AppColors.lightSurface, // For surfaces of components like Card, BottomSheet. (White)
-        background: AppColors.lightPageBackground, // Overall background. (Light Blueish)
+        surface: AppColors.lightSurface, // Overall background. (Light Blueish)
         error: AppColors.errorRed, // Color for error indication.
         onPrimary: AppColors.textOnPrimaryLight, // Text/icon color on primary color (White on Dark Blue).
         onSecondary: AppColors.textOnGold, // Text/icon color on secondary color (Black on Gold).
-        onSurface: AppColors.lightTextPrimary, // Text/icon color on surface color (Dark Blue on White).
-        onBackground: AppColors.lightTextPrimary, // Text/icon color on background color.
+        onSurface: AppColors.lightTextPrimary, // Text/icon color on background color.
         onError: AppColors.textWhite, // Text/icon color on error color.
         
         // --- ADDED Tertiary Colors for Light Theme ---
@@ -101,13 +99,11 @@ class AppTheme {
       colorScheme: const ColorScheme.dark(
         primary: AppColors.accent, // Lighter Blue
         secondary: AppColors.primaryGold, // Gold
-        surface: AppColors.darkSurface, // For surfaces of components (Darker Blue/Grey).
-        background: AppColors.darkPageBackground, // Overall background (Very Dark Desaturated Blue).
+        surface: AppColors.darkSurface, // Overall background (Very Dark Desaturated Blue).
         error: AppColors.errorRed,
         onPrimary: AppColors.textOnPrimaryDark, // Text/icon on primary (White on Lighter Blue).
         onSecondary: AppColors.textOnGold, // Text/icon on secondary (Black on Gold).
-        onSurface: AppColors.darkTextPrimary, // Text/icon on surface (Light Blueish Grey).
-        onBackground: AppColors.darkTextPrimary, // Text/icon on background.
+        onSurface: AppColors.darkTextPrimary, // Text/icon on background.
         onError: AppColors.textWhite, // Text/icon on error color.
 
         // --- ADDED Tertiary Colors for Dark Theme ---

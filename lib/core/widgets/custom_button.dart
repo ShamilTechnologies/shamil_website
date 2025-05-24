@@ -12,7 +12,7 @@ class CustomButton extends StatefulWidget {
   final Color? foregroundColor; // Prop to override theme's foreground (text/icon)
   final BorderSide? side;      // Prop to override theme's border
   final double? elevation;     // Prop to override theme's elevation
-  final MaterialStateProperty<Color?>? overlayColor; // Prop to override hover/splash
+  final WidgetStateProperty<Color?>? overlayColor; // Prop to override hover/splash
   final Duration animationDuration; // Duration for hover animation
   final double hoverScale; // Scale factor on hover
 
@@ -60,14 +60,14 @@ class _CustomButtonState extends State<CustomButton> {
         // DO NOT set overlayColor directly in styleFrom if using the prop
       ).merge(baseThemeStyle?.copyWith(
           // Ensure elevation and background are definitely overridden
-          elevation: MaterialStateProperty.all(widget.elevation ?? 0.0),
-          backgroundColor: MaterialStateProperty.all(widget.backgroundColor ?? Colors.transparent),
+          elevation: WidgetStateProperty.all(widget.elevation ?? 0.0),
+          backgroundColor: WidgetStateProperty.all(widget.backgroundColor ?? Colors.transparent),
           // Apply the overlayColor prop if provided, otherwise use default outline overlay (now using white with opacity)
-          overlayColor: widget.overlayColor ?? MaterialStateProperty.all(AppColors.white.withOpacity(0.15)),
+          overlayColor: widget.overlayColor ?? WidgetStateProperty.all(AppColors.white.withOpacity(0.15)),
           // Apply side prop if provided
-          side: widget.side != null ? MaterialStateProperty.all(widget.side) : null,
+          side: widget.side != null ? WidgetStateProperty.all(widget.side) : null,
           // Apply foreground override if provided
-          foregroundColor: widget.foregroundColor != null ? MaterialStateProperty.all(widget.foregroundColor) : MaterialStateProperty.all(AppColors.textWhite),
+          foregroundColor: widget.foregroundColor != null ? WidgetStateProperty.all(widget.foregroundColor) : WidgetStateProperty.all(AppColors.textWhite),
       ));
 
     } else {
@@ -77,21 +77,19 @@ class _CustomButtonState extends State<CustomButton> {
 
       // Apply overrides if props are provided, wrapping simple values with MaterialStateProperty.all()
       specificStyle = specificStyle.copyWith(
-        backgroundColor: widget.backgroundColor != null ? MaterialStateProperty.all(widget.backgroundColor) : null,
-        foregroundColor: widget.foregroundColor != null ? MaterialStateProperty.all(widget.foregroundColor) : null,
-        side: widget.side != null ? MaterialStateProperty.all(widget.side) : null,
-        elevation: widget.elevation != null ? MaterialStateProperty.all(widget.elevation) : null,
+        backgroundColor: widget.backgroundColor != null ? WidgetStateProperty.all(widget.backgroundColor) : null,
+        foregroundColor: widget.foregroundColor != null ? WidgetStateProperty.all(widget.foregroundColor) : null,
+        side: widget.side != null ? WidgetStateProperty.all(widget.side) : null,
+        elevation: widget.elevation != null ? WidgetStateProperty.all(widget.elevation) : null,
         overlayColor: widget.overlayColor, // Directly use the overlayColor prop
       );
     }
 
     // Determine the final foreground color for the icon, considering overrides and theme.
     Color? currentForegroundColor = specificStyle.foregroundColor?.resolve({});
-    if (currentForegroundColor == null) { // Fallback logic
-      currentForegroundColor = widget.isSecondary
+    currentForegroundColor ??= widget.isSecondary
           ? AppColors.textWhite // Default secondary foreground is white
-          : theme.colorScheme.onPrimary; // Default primary foreground
-    }
+          : theme.colorScheme.onPrimary;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
