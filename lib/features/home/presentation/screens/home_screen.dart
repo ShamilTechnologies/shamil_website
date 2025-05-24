@@ -2,9 +2,7 @@
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-// 🔧 FIXED: Only import InnovativeAppBar from the correct location
 import 'package:shamil_web/core/widgets/innovative_app_bar.dart';
-// 🔧 FIXED: Import AppPreviewSection but make sure it doesn't contain InnovativeAppBar class
 import 'package:shamil_web/features/home/presentation/widgets/app_preview_section.dart';
 import 'package:shamil_web/features/home/presentation/widgets/benefits_section.dart';
 import 'package:shamil_web/features/home/presentation/widgets/download_cta_section.dart';
@@ -98,8 +96,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _toggleTheme() {
     // Note: You'll need to implement theme state management
     // This is a placeholder - you might use Provider, Bloc, or Riverpod
-    // Example with Provider:
-    // Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
     
     // For now, showing a snackbar as placeholder
     ScaffoldMessenger.of(context).showSnackBar(
@@ -161,6 +157,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       extendBodyBehindAppBar: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       
+      // 🔧 FIXED: Using correct constructor parameters that match InnovativeAppBar
+      appBar: InnovativeAppBar(
+        title: 'Shamil',
+        onMenuTap: _showEnhancedMobileMenu,
+        scrollController: _scrollController, // ✅ Required parameter
+        isDarkMode: _isDarkMode(),
+        currentLanguage: _currentLanguage(),
+        onLanguageToggle: _toggleLanguage,
+        onThemeToggle: _toggleTheme,
+      ),
      
       body: AnimatedBuilder(
         animation: _fadeAnimation,
@@ -191,7 +197,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             key: _aboutKey,
             child: const IntroSection(),
           ),
-          // 🔧 NOTE: Make sure these sections don't conflict with AppBar
           EnhancedRocketSeparatorSection(
             scrollController: _scrollController,
           ),
@@ -207,7 +212,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           const BenefitsSection(),
           const HowItWorksSection(),
           const TestimonialsSection(),
-
+          // Uncomment if you want to add AppPreviewSection
+          // const AppPreviewSection(),
           Container(
             key: _downloadKey,
             child: const DownloadCtaSection(),

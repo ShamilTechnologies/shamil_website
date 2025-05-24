@@ -1,10 +1,10 @@
 // lib/core/widgets/innovative_app_bar.dart
 
-import 'dart:html' as html; // 📁 For web file downloads
+import 'dart:html' as html;
 import 'dart:math' as math;
-// 📊 For binary data handling
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // 🎨 For loading assets
+import 'package:flutter/services.dart';
 import 'package:shamil_web/core/constants/app_assets.dart';
 import 'package:shamil_web/core/constants/app_dimensions.dart';
 import 'package:shamil_web/core/widgets/language_switcher.dart';
@@ -14,13 +14,23 @@ import 'package:responsive_framework/responsive_framework.dart';
 /// 🚀 INNOVATIVE APP BAR WITH ROTATING LOGO & DOWNLOAD FEATURE 🚀
 /// Features: Continuous logo rotation, glassmorphism design, smart download system
 class InnovativeAppBar extends StatefulWidget implements PreferredSizeWidget {
-  final ScrollController scrollController; // Note: This is the ScrollController from the parent
+  final String title;
   final VoidCallback? onMenuTap;
+  final ScrollController scrollController;
+  final bool isDarkMode;
+  final String currentLanguage;
+  final VoidCallback? onLanguageToggle;
+  final VoidCallback? onThemeToggle;
 
   const InnovativeAppBar({
     super.key,
-    required this.scrollController,
+    required this.title,
     this.onMenuTap,
+    required this.scrollController,
+    this.isDarkMode = false,
+    this.currentLanguage = 'en',
+    this.onLanguageToggle,
+    this.onThemeToggle,
   });
 
   @override
@@ -35,7 +45,7 @@ class _InnovativeAppBarState extends State<InnovativeAppBar>
   
   // 🎭 Animation Controllers
   late AnimationController _logoRotationController;
-  late AnimationController _appBarAnimationController; // Renamed from _scrollController to avoid confusion
+  late AnimationController _appBarAnimationController;
   late AnimationController _downloadController;
   
   // 📊 State Variables
@@ -48,9 +58,9 @@ class _InnovativeAppBarState extends State<InnovativeAppBar>
     
     // 🔄 Continuous Logo Rotation (Never stops!)
     _logoRotationController = AnimationController(
-      duration: const Duration(seconds: 8), // Smooth 8-second rotation
+      duration: const Duration(seconds: 8),
       vsync: this,
-    )..repeat(); // 🔁 Loop forever!
+    )..repeat();
     
     // 📜 Scroll-aware animations for the AppBar itself
     _appBarAnimationController = AnimationController(
@@ -80,15 +90,14 @@ class _InnovativeAppBarState extends State<InnovativeAppBar>
   // 📜 Handle scroll changes for dynamic effects
   void _onScroll() {
     final offset = widget.scrollController.offset;
-    // Check if the widget is still mounted before calling setState
     if (mounted) {
       setState(() {
         _scrollOffset = offset;
       });
     }
     
-    // 🌊 Animate AppBar based on scroll (e.g., for background opacity or other effects)
-    if (offset > 100) { // Example threshold
+    // 🌊 Animate AppBar based on scroll
+    if (offset > 100) {
       if (mounted) _appBarAnimationController.forward();
     } else {
       if (mounted) _appBarAnimationController.reverse();
@@ -97,16 +106,14 @@ class _InnovativeAppBarState extends State<InnovativeAppBar>
 
   // 📥 Smart Download Handler
   Future<void> _handleDownload() async {
-    if (_isDownloading) return; // 🚫 Prevent multiple downloads
+    if (_isDownloading) return;
     
     if (mounted) setState(() => _isDownloading = true);
     if (mounted) _downloadController.forward();
     
     try {
-      // 🎯 Show download options dialog
       await _showDownloadOptions();
     } catch (e) {
-      // ❌ Handle download error
       if (mounted) _showErrorSnackBar('Download failed. Please try again.');
     } finally {
       if (mounted) {
@@ -124,7 +131,7 @@ class _InnovativeAppBarState extends State<InnovativeAppBar>
     return showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (BuildContext dialogContext) => Dialog( // Use dialogContext
+      builder: (BuildContext dialogContext) => Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
           width: isMobile ? double.infinity : 400,
@@ -180,14 +187,14 @@ class _InnovativeAppBarState extends State<InnovativeAppBar>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Download Shamil App', // Consider localizing
+                          'Download Shamil App',
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: theme.colorScheme.onSurface,
                           ),
                         ),
                         Text(
-                          'Choose your platform', // Consider localizing
+                          'Choose your platform',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurface.withOpacity(0.7),
                           ),
@@ -196,7 +203,7 @@ class _InnovativeAppBarState extends State<InnovativeAppBar>
                     ),
                   ),
                   IconButton(
-                    onPressed: () => Navigator.pop(dialogContext), // Use dialogContext
+                    onPressed: () => Navigator.pop(dialogContext),
                     icon: Icon(
                       Icons.close_rounded,
                       color: theme.colorScheme.onSurface.withOpacity(0.5),
@@ -213,7 +220,7 @@ class _InnovativeAppBarState extends State<InnovativeAppBar>
                 'shamil-app-android.apk',
                 Icons.android_rounded,
                 theme.colorScheme.primary,
-                () => _downloadFile('android', dialogContext), // Pass dialogContext
+                () => _downloadFile('android', dialogContext),
               ),
               
               const SizedBox(height: 12),
@@ -223,7 +230,7 @@ class _InnovativeAppBarState extends State<InnovativeAppBar>
                 'shamil-app-windows.exe',
                 Icons.desktop_windows_rounded,
                 Colors.blue,
-                () => _downloadFile('windows', dialogContext), // Pass dialogContext
+                () => _downloadFile('windows', dialogContext),
               ),
               
               const SizedBox(height: 12),
@@ -233,7 +240,7 @@ class _InnovativeAppBarState extends State<InnovativeAppBar>
                 'shamil-app-macos.dmg',
                 Icons.laptop_mac_rounded,
                 Colors.grey.shade700,
-                () => _downloadFile('macos', dialogContext), // Pass dialogContext
+                () => _downloadFile('macos', dialogContext),
               ),
               
               const SizedBox(height: 12),
@@ -243,7 +250,7 @@ class _InnovativeAppBarState extends State<InnovativeAppBar>
                 'shamil-app-ios.ipa',
                 Icons.phone_iphone_rounded,
                 Colors.black,
-                () => _downloadFile('ios', dialogContext), // Pass dialogContext
+                () => _downloadFile('ios', dialogContext),
               ),
             ],
           ),
@@ -325,7 +332,7 @@ class _InnovativeAppBarState extends State<InnovativeAppBar>
 
   // 📁 Download File Function
   Future<void> _downloadFile(String platform, BuildContext dialogContext) async {
-    Navigator.pop(dialogContext); // Close dialog using its own context
+    Navigator.pop(dialogContext);
     
     if (!mounted) return;
 
@@ -349,12 +356,8 @@ class _InnovativeAppBarState extends State<InnovativeAppBar>
     }
   }
 
-  // 📝 Generate Sample App Content (Replace with actual app binaries or asset paths)
+  // 📝 Generate Sample App Content
   String _generateAppFileContent(String platform) {
-    // For actual file downloads, you would typically load ByteData from assets
-    // or fetch from a URL, not generate text content like this.
-    // Example: final ByteData data = await rootBundle.load('assets/downloads/shamil-app-$platform.${_getFileExtension(platform)}');
-    // final List<int> bytes = data.buffer.asUint8List();
     return '''
 # Shamil App - $platform Version (Sample Placeholder)
 
@@ -378,13 +381,13 @@ Thank you for choosing Shamil App!
       case 'android': return 'apk';
       case 'windows': return 'exe';
       case 'macos': return 'dmg';
-      case 'ios': return 'ipa'; // Note: Direct IPA download/install is usually restricted
+      case 'ios': return 'ipa';
       default: return 'txt';
     }
   }
 
   void _showSnackBar(String message, Color backgroundColor, IconData iconData) {
-     if (!mounted) return;
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -408,7 +411,7 @@ Thank you for choosing Shamil App!
 
   // ❌ Show Error Message
   void _showErrorSnackBar(String message) {
-     _showSnackBar(message, Colors.red, Icons.error_rounded);
+    _showSnackBar(message, Colors.red, Icons.error_rounded);
   }
 
   @override
@@ -416,8 +419,7 @@ Thank you for choosing Shamil App!
     final theme = Theme.of(context);
     final isMobile = ResponsiveBreakpoints.of(context).smallerOrEqualTo(MOBILE);
     
-    // 🌊 Dynamic background opacity based on scroll for the AppBar container
-    // This uses the AnimationController `_appBarAnimationController` which is driven by scroll offset
+    // 🌊 Dynamic background opacity based on scroll
     final backgroundOpacity = _appBarAnimationController.drive(Tween<double>(begin: 0.0, end: 0.95)).value;
     
     return AnimatedBuilder(
@@ -425,7 +427,6 @@ Thank you for choosing Shamil App!
       builder: (context, child) {
         return Container(
           decoration: BoxDecoration(
-            // 🌈 Glassmorphism background for the container housing the AppBar
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -439,16 +440,15 @@ Thank you for choosing Shamil App!
                       Colors.grey.shade900.withOpacity(backgroundOpacity * 0.8),
                     ],
             ),
-            // ✨ Dynamic border
             border: Border(
               bottom: BorderSide(
-                color: theme.colorScheme.primary.withOpacity(backgroundOpacity * 0.2), // Softer border
+                color: theme.colorScheme.primary.withOpacity(backgroundOpacity * 0.2),
                 width: 1,
               ),
             ),
           ),
           child: AppBar(
-            backgroundColor: Colors.transparent, // AppBar itself is transparent
+            backgroundColor: Colors.transparent,
             elevation: 0,
             automaticallyImplyLeading: false,
             toolbarHeight: 80,
@@ -459,12 +459,12 @@ Thank you for choosing Shamil App!
               padding: const EdgeInsets.all(12),
               alignment: Alignment.center,
               child: Transform.rotate(
-                angle: _logoRotationController.value * 2 * math.pi, // Corrected pi usage
+                angle: _logoRotationController.value * 2 * math.pi,
                 child: Image.asset(
-                  AppAssets.logo, // Make sure AppAssets.logo is correctly defined
+                  AppAssets.logo,
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) => Icon(
-                    Icons.rocket_launch_rounded, // Fallback icon
+                    Icons.rocket_launch_rounded,
                     color: theme.colorScheme.primary,
                     size: 32,
                   ),
@@ -474,7 +474,7 @@ Thank you for choosing Shamil App!
             
             // 🏷️ Title (Hidden on mobile to save space)
             title: !isMobile ? Text(
-              'Shamil', // Consider localizing
+              widget.title, // Use the title from widget properties
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: theme.colorScheme.primary,
@@ -490,7 +490,7 @@ Thank you for choosing Shamil App!
                   animation: _downloadController,
                   builder: (context, child) {
                     return Transform.scale(
-                      scale: 1.0 + (_downloadController.value * 0.05), // Subtle scale animation
+                      scale: 1.0 + (_downloadController.value * 0.05),
                       child: Container(
                         margin: const EdgeInsets.only(right: AppDimensions.paddingSmall),
                         child: Material(
@@ -508,7 +508,7 @@ Thank you for choosing Shamil App!
                                 gradient: LinearGradient(
                                   colors: [
                                     theme.colorScheme.primary,
-                                    theme.colorScheme.secondary, // Using secondary for gradient
+                                    theme.colorScheme.secondary,
                                   ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
@@ -540,7 +540,7 @@ Thank you for choosing Shamil App!
                                     ),
                                   const SizedBox(width: AppDimensions.paddingSmall),
                                   Text(
-                                    _isDownloading ? 'Downloading...' : 'Download', // Consider localizing
+                                    _isDownloading ? 'Downloading...' : 'Download',
                                     style: theme.textTheme.labelLarge?.copyWith(
                                       color: theme.colorScheme.onPrimary,
                                       fontWeight: FontWeight.w600,
@@ -565,7 +565,7 @@ Thank you for choosing Shamil App!
               ] else ...[
                 // 📱 Mobile Menu Button
                 IconButton(
-                  onPressed: widget.onMenuTap, // Use the callback from the widget
+                  onPressed: widget.onMenuTap,
                   icon: Icon(
                     Icons.menu_rounded,
                     color: theme.colorScheme.primary,
@@ -573,7 +573,7 @@ Thank you for choosing Shamil App!
                   ),
                 ),
               ],
-              const SizedBox(width: AppDimensions.paddingSmall), // Consistent right padding
+              const SizedBox(width: AppDimensions.paddingSmall),
             ],
           ),
         );
