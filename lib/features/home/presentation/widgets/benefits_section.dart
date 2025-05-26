@@ -1,49 +1,18 @@
 // lib/features/home/presentation/widgets/benefits_section.dart
 
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shamil_web/core/constants/app_dimensions.dart';
 import 'package:shamil_web/core/constants/app_strings.dart';
-import 'package:shamil_web/core/constants/app_colors.dart'; // Assuming your AppColors are here
+import 'package:shamil_web/core/constants/app_colors.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-// Data model for benefit cards (reusing and simplifying from original)
-class ViralCardData {
-  final String titleKey;
-  final List<ViralBenefit> benefits;
-  final IconData primaryIcon;
-  final Color gradientStart;
-  final Color gradientEnd;
-  // final String emoji; // Kept if needed for other parts, but not used in simplified card
-  // final String statistic; // Kept if needed, not used in simplified card
-  // final String flipMessage; // Kept if needed, not used in simplified card
-
-  ViralCardData({
-    required this.titleKey,
-    required this.benefits,
-    required this.primaryIcon,
-    required this.gradientStart,
-    required this.gradientEnd,
-    String emoji = "", // Provide default if not used
-    String statistic = "", // Provide default
-    String flipMessage = "", // Provide default
-  });
-}
-
-// Individual benefit item
-class ViralBenefit {
-  final String textKey;
-  final String emoji;
-  final String buzzword; // Keeping this for descriptive flair
-
-  ViralBenefit(this.textKey, this.emoji, this.buzzword);
-}
-
-
-/// Simplified Benefits Section
-/// Displays benefits for users and providers using clear, themed cards.
+/// 🌟 OPTIMIZED BENEFITS SECTION 🌟
+/// Performance-optimized with reduced animations and better memory management
 class BenefitsSection extends StatefulWidget {
   const BenefitsSection({super.key});
 
@@ -51,67 +20,108 @@ class BenefitsSection extends StatefulWidget {
   State<BenefitsSection> createState() => _BenefitsSectionState();
 }
 
-class _BenefitsSectionState extends State<BenefitsSection> {
+class _BenefitsSectionState extends State<BenefitsSection>
+    with TickerProviderStateMixin {
+  // 🎭 Optimized Animation Controllers - Reduced from 3 to 2
+  late AnimationController _floatingController;
+  late AnimationController _typewriterController;
+  late Animation<double> _floatingAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupOptimizedAnimations();
+  }
+
+  /// 🔧 Setup lightweight animations
+  void _setupOptimizedAnimations() {
+    // Slower, less frequent floating animation
+    _floatingController = AnimationController(
+      duration: const Duration(seconds: 12), // Slower = less CPU
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _floatingAnimation = Tween<double>(
+      begin: -5.0, // Reduced movement
+      end: 5.0,
+    ).animate(CurvedAnimation(
+      parent: _floatingController,
+      curve: Curves.easeInOutSine,
+    ));
+
+    // Simplified typewriter effect
+    _typewriterController = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    );
+
+    // Start typewriter with delay
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (mounted) {
+        _typewriterController.forward();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _floatingController.dispose();
+    _typewriterController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool isMobile = ResponsiveBreakpoints.of(context).smallerOrEqualTo(MOBILE);
+    final theme = Theme.of(context);
+    final isMobile = ResponsiveBreakpoints.of(context).smallerOrEqualTo(MOBILE);
+    final isTablet = ResponsiveBreakpoints.of(context).equals(TABLET);
 
     return Container(
-      decoration: _buildSectionBackground(theme),
-      child: _buildBenefitsContent(theme, isMobile),
+      decoration: _buildSimpleBackground(theme),
+      child: _buildMainContent(theme, isMobile, isTablet),
     );
   }
 
-  BoxDecoration _buildSectionBackground(ThemeData theme) {
-    // Simplified background using Shamil colors
+  /// 🎨 Simplified gradient background - No particles for performance
+  BoxDecoration _buildSimpleBackground(ThemeData theme) {
     return BoxDecoration(
       gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
         colors: theme.brightness == Brightness.light
             ? [
-                AppColors.lightPageBackground.withOpacity(0.5),
-                AppColors.accent.withOpacity(0.1),
+                AppColors.lightPageBackground,
+                AppColors.primary.withOpacity(0.03),
                 AppColors.lightPageBackground,
               ]
             : [
                 AppColors.darkPageBackground,
-                AppColors.primary.withOpacity(0.3),
-                AppColors.darkPageBackground.withOpacity(0.8),
-
+                AppColors.accent.withOpacity(0.05),
+                AppColors.darkPageBackground,
               ],
-        stops: const [0.0, 0.5, 1.0]
       ),
     );
   }
 
-  Widget _buildBenefitsContent(ThemeData theme, bool isMobile) {
+  /// 📱 Optimized main content
+  Widget _buildMainContent(ThemeData theme, bool isMobile, bool isTablet) {
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: AppDimensions.paddingPageHorizontal,
-        vertical: AppDimensions.paddingSectionVertical,
+        horizontal: isMobile ? 20 : (isTablet ? 30 : 40),
+        vertical: isMobile ? 60 : 80, // Reduced padding
       ),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200), // Consistent max width
+          constraints: const BoxConstraints(maxWidth: 1400), // Reduced max width
           child: Column(
             children: [
-              _buildSectionHeader(theme, isMobile)
-                .animate()
-                .fadeIn(delay: 200.ms, duration: 600.ms)
-                .slideY(begin: 0.2, duration: 600.ms, curve: Curves.easeOutCubic),
+              // 📝 Simple section header
+              _buildSimpleHeader(theme, isMobile),
               
-              SizedBox(height: isMobile ? 50 : 80),
+              SizedBox(height: isMobile ? 60 : 80), // Reduced spacing
               
-              _buildBenefitCards(theme, isMobile),
-              
-              SizedBox(height: isMobile ? 50 : 80),
-              
-              _buildCallToAction(theme, isMobile)
-                .animate()
-                .fadeIn(delay: 600.ms, duration: 600.ms)
-                .slideY(begin: 0.2, duration: 600.ms, curve: Curves.easeOutCubic),
+              // 🎴 Optimized flip cards with minimal floating
+              _buildOptimizedFlipCards(theme, isMobile, isTablet),
             ],
           ),
         ),
@@ -119,287 +129,524 @@ class _BenefitsSectionState extends State<BenefitsSection> {
     );
   }
 
-  Widget _buildSectionHeader(ThemeData theme, bool isMobile) {
-    // Using AppStrings for title for consistency
-    final String title = AppStrings.whyChooseShamil.tr();
-    final String subtitle = AppStrings.flipCardsToDiscover.tr(); // Example, can be more specific
-
+  /// 📝 Simplified header with minimal animations
+  Widget _buildSimpleHeader(ThemeData theme, bool isMobile) {
+    final isRTL = Localizations.localeOf(context).languageCode == 'ar';
+    
     return Column(
       children: [
+        // 🏷️ Simple title
         Text(
-          title,
+          AppStrings.whyChooseShamil.tr(),
           style: (isMobile 
-              ? theme.textTheme.headlineLarge 
+              ? theme.textTheme.headlineLarge
               : theme.textTheme.displaySmall)?.copyWith(
+            fontWeight: FontWeight.w800,
             color: theme.colorScheme.onSurface,
-            fontWeight: FontWeight.bold,
+            letterSpacing: isRTL ? 0 : -0.5,
+            height: isRTL ? 1.3 : 1.2,
           ),
           textAlign: TextAlign.center,
-        ).animate().shimmer(delay: 400.ms, duration: 1800.ms, color: theme.colorScheme.primary.withOpacity(0.3)),
-        const SizedBox(height: AppDimensions.paddingMedium),
+        )
+        .animate()
+        .fadeIn(delay: 200.ms, duration: 600.ms)
+        .slideY(begin: -0.2, duration: 600.ms),
+
+        const SizedBox(height: 24),
+
+        // 📝 Optimized typewriter
         Container(
-          constraints: const BoxConstraints(maxWidth: 700),
-          child: Text(
-            subtitle, // "Experience the future of service booking with our revolutionary platform"
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
-              height: 1.6,
-            ),
-            textAlign: TextAlign.center,
-          ).animate(delay: 600.ms) // Stagger the subtitle animation
-           .fadeIn(duration: 800.ms)
-           .custom( // Typewriter effect
-             duration: 2000.ms, // Adjust duration for speed
-             builder: (context, value, child) {
-               final fullText = subtitle;
-               final displayedLength = (fullText.length * value).round().clamp(0, fullText.length);
-               return Text(
-                 fullText.substring(0, displayedLength),
-                 style: theme.textTheme.titleMedium?.copyWith(
-                   color: theme.colorScheme.onSurface.withOpacity(0.7),
-                   height: 1.6,
-                 ),
-                 textAlign: TextAlign.center,
-               );
-             },
-           ),
+          constraints: const BoxConstraints(maxWidth: 600),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: AnimatedBuilder(
+            animation: _typewriterController,
+            builder: (context, child) {
+              const fullText = 'Experience seamless service booking with our innovative platform.';
+              final displayedLength = (fullText.length * _typewriterController.value).round();
+              final displayedText = fullText.substring(0, displayedLength);
+              
+              return Text(
+                displayedText,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  height: isRTL ? 1.5 : 1.4,
+                  fontWeight: FontWeight.w400,
+                ),
+                textAlign: TextAlign.center,
+              );
+            },
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildBenefitCards(ThemeData theme, bool isMobile) {
-    return ResponsiveRowColumn(
-      layout: isMobile ? ResponsiveRowColumnType.COLUMN : ResponsiveRowColumnType.ROW,
-      rowCrossAxisAlignment: CrossAxisAlignment.start, // Align cards to the top if heights differ
-      columnCrossAxisAlignment: CrossAxisAlignment.center,
-      rowSpacing: AppDimensions.paddingLarge * (isMobile ? 1.5 : 2), // Responsive spacing
-      columnSpacing: AppDimensions.paddingLarge * 2,
-      children: [
-        ResponsiveRowColumnItem(
-          rowFlex: 1,
-          child: BenefitCard(
-            theme: theme,
-            cardData: ViralCardData(
-              titleKey: AppStrings.forUsersTitle,
-              benefits: [
-                ViralBenefit(AppStrings.forUsersBenefit1, "⚡", "Speed"),
-                ViralBenefit(AppStrings.forUsersBenefit2, "🛡️", "Security"),
-                ViralBenefit(AppStrings.forUsersBenefit3, "🎯", "Precision"),
-                ViralBenefit(AppStrings.forUsersBenefit4, "🌍", "Accessibility"),
-              ],
-              primaryIcon: Icons.person_rounded,
-              gradientStart: AppColors.primary, // Shamil Dark Blue
-              gradientEnd: AppColors.accent,     // Shamil Lighter Blue
-            ),
-          ).animate(delay: 400.ms) // Stagger card animations
-           .fadeIn(duration: 700.ms, curve: Curves.easeOutCubic)
-           .slideX(begin: isMobile ? 0 : -0.1, duration: 700.ms, curve: Curves.easeOutCubic)
-           .scaleXY(begin: 0.95, curve: Curves.easeOutCubic),
-        ),
-        ResponsiveRowColumnItem(
-          rowFlex: 1,
-          child: BenefitCard(
-            theme: theme,
-            cardData: ViralCardData(
-              titleKey: AppStrings.forProvidersTitle,
-              benefits: [
-                ViralBenefit(AppStrings.forProvidersBenefit1, "🤖", "Automation"),
-                ViralBenefit(AppStrings.forProvidersBenefit2, "📊", "Analytics"),
-                ViralBenefit(AppStrings.forProvidersBenefit3, "💰", "Growth"),
-                ViralBenefit(AppStrings.forProvidersBenefit4, "🚀", "Efficiency"),
-              ],
-              primaryIcon: Icons.store_rounded,
-              gradientStart: AppColors.primaryGold,      // Shamil Gold
-              gradientEnd: AppColors.primaryGoldLight, // Lighter Gold
-            ),
-          ).animate(delay: 600.ms) // Stagger second card
-           .fadeIn(duration: 700.ms, curve: Curves.easeOutCubic)
-           .slideX(begin: isMobile ? 0 : 0.1, duration: 700.ms, curve: Curves.easeOutCubic)
-           .scaleXY(begin: 0.95, curve: Curves.easeOutCubic),
-        ),
-      ],
+  /// 🎴 Optimized flip cards with minimal floating
+  Widget _buildOptimizedFlipCards(ThemeData theme, bool isMobile, bool isTablet) {
+    return AnimatedBuilder(
+      animation: _floatingAnimation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _floatingAnimation.value * 0.5), // Reduced floating
+          child: ResponsiveRowColumn(
+            layout: isMobile ? ResponsiveRowColumnType.COLUMN : ResponsiveRowColumnType.ROW,
+            rowCrossAxisAlignment: CrossAxisAlignment.start,
+            columnCrossAxisAlignment: CrossAxisAlignment.center,
+            rowSpacing: isMobile ? 30 : 40, // Reduced spacing
+            columnSpacing: isTablet ? 30 : 60,
+            children: [
+              // 👤 Users Card
+              ResponsiveRowColumnItem(
+                rowFlex: 1,
+                child: OptimizedFlipCard(
+                  theme: theme,
+                  cardData: _getUsersCardData(),
+                  delay: 400.ms,
+                  isMobile: isMobile,
+                  isTablet: isTablet,
+                ),
+              ),
+              
+              // 🏢 Providers Card
+              ResponsiveRowColumnItem(
+                rowFlex: 1,
+                child: OptimizedFlipCard(
+                  theme: theme,
+                  cardData: _getProvidersCardData(),
+                  delay: 600.ms,
+                  isMobile: isMobile,
+                  isTablet: isTablet,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildCallToAction(ThemeData theme, bool isMobile) {
-    // Simplified CTA, can reuse existing CTA button styles if available
-    return Column(
-      children: [
-        Text(
-          "Ready to Get Started?".tr(), // Example, use AppStrings
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onSurface,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: AppDimensions.paddingMedium),
-        ElevatedButton(
-          onPressed: () { /* TODO: CTA Action */ },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primaryGold,
-            foregroundColor: AppColors.textOnGold,
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppDimensions.paddingExtraLarge,
-                vertical: AppDimensions.paddingMedium),
-            textStyle: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
-            ),
-          ),
-          child: Text(AppStrings.downloadNow.tr()),
-        ),
+  /// 👤 Users card data
+  SimpleCardData _getUsersCardData() {
+    return SimpleCardData(
+      title: AppStrings.forUsersTitle.tr(),
+      frontIcon: Icons.person_outline_rounded,
+      backIcon: Icons.star_outline_rounded,
+      primaryColor: AppColors.primary,
+      benefits: [
+        '⚡ Lightning-fast booking',
+        '🛡️ Bank-level security',
+        '🎯 Smart recommendations',
+        '🌍 Available worldwide',
       ],
+      frontDescription: 'Perfect for Users',
+      backDescription: 'Book services effortlessly with our user-friendly platform.',
+    );
+  }
+
+  /// 🏢 Providers card data
+  SimpleCardData _getProvidersCardData() {
+    return SimpleCardData(
+      title: AppStrings.forProvidersTitle.tr(),
+      frontIcon: Icons.business_center_outlined,
+      backIcon: Icons.trending_up_rounded,
+      primaryColor: AppColors.primaryGold,
+      benefits: [
+        '🤖 Automated management',
+        '📊 Analytics dashboard',
+        '💰 Increase revenue',
+        '🚀 Expand customer base',
+      ],
+      frontDescription: 'Grow Your Business',
+      backDescription: 'Manage your services efficiently with our comprehensive tools.',
     );
   }
 }
 
+/// 📊 Card data model (unchanged)
+class SimpleCardData {
+  final String title;
+  final IconData frontIcon;
+  final IconData backIcon;
+  final Color primaryColor;
+  final List<String> benefits;
+  final String frontDescription;
+  final String backDescription;
 
-/// Simplified Benefit Card Widget
-class BenefitCard extends StatefulWidget {
+  SimpleCardData({
+    required this.title,
+    required this.frontIcon,
+    required this.backIcon,
+    required this.primaryColor,
+    required this.benefits,
+    required this.frontDescription,
+    required this.backDescription,
+  });
+}
+
+/// 🎴 Optimized flip card with better performance
+class OptimizedFlipCard extends StatefulWidget {
   final ThemeData theme;
-  final ViralCardData cardData;
+  final SimpleCardData cardData;
+  final Duration delay;
+  final bool isMobile;
+  final bool isTablet;
 
-  const BenefitCard({
+  const OptimizedFlipCard({
     super.key,
     required this.theme,
     required this.cardData,
+    required this.delay,
+    required this.isMobile,
+    required this.isTablet,
   });
 
   @override
-  State<BenefitCard> createState() => _BenefitCardState();
+  State<OptimizedFlipCard> createState() => _OptimizedFlipCardState();
 }
 
-class _BenefitCardState extends State<BenefitCard> {
-  bool _isHovered = false;
+class _OptimizedFlipCardState extends State<OptimizedFlipCard>
+    with TickerProviderStateMixin {
+  // 🎭 Reduced animation controllers
+  late AnimationController _flipController;
+  late AnimationController _hoverController;
+  late Animation<double> _flipAnimation;
+  late Animation<double> _scaleAnimation;
+  
+  // 🏷️ State variables
+  bool _isFlipped = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupOptimizedAnimations();
+  }
+
+  /// 🔧 Setup lightweight animations
+  void _setupOptimizedAnimations() {
+    // Faster flip animation
+    _flipController = AnimationController(
+      duration: Duration(milliseconds: widget.isMobile ? 600 : 500),
+      vsync: this,
+    );
+
+    // Lighter hover animation
+    _hoverController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+
+    // Smooth flip
+    _flipAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _flipController,
+      curve: Curves.easeInOutQuart, // Lighter curve
+    ));
+
+    // Subtle scale
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: widget.isMobile ? 1.02 : 1.03, // Reduced scale
+    ).animate(CurvedAnimation(
+      parent: _hoverController,
+      curve: Curves.easeOut,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _flipController.dispose();
+    _hoverController.dispose();
+    super.dispose();
+  }
+
+  /// 🎯 Handle card tap
+  void _handleTap() {
+    if (_isFlipped) {
+      _flipController.reverse();
+    } else {
+      _flipController.forward();
+    }
+    setState(() {
+      _isFlipped = !_isFlipped;
+    });
+  }
+
+  /// 🖱️ Handle hover
+  void _handleHover(bool isHovered) {
+    if (isHovered) {
+      _hoverController.forward();
+    } else {
+      _hoverController.reverse();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final cardTextColor = widget.theme.brightness == Brightness.light 
-                          ? AppColors.textWhite // Good contrast on dark blue/gold
-                          : AppColors.darkTextPrimary; // Ensure good contrast on lighter versions if used in dark theme
+    final isRTL = Localizations.localeOf(context).languageCode == 'ar';
     
-    // For gradients on dark backgrounds, white text is usually best.
-    // If cardData gradients are light, then a dark text color would be needed.
-    // Assuming gradientStart/End are Shamil's primary (dark blue) and gold, white text is fine.
+    // 📏 Fixed sizing
+    final cardHeight = widget.isMobile ? 320.0 : (widget.isTablet ? 360.0 : 400.0);
 
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      cursor: SystemMouseCursors.click, // Indicates interactivity, even if just hover
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        height: 420, // Fixed height for consistency, adjust as needed
-        padding: const EdgeInsets.all(AppDimensions.paddingLarge),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [widget.cardData.gradientStart, widget.cardData.gradientEnd],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
-          boxShadow: _isHovered
-              ? [
-                  BoxShadow(
-                    color: widget.cardData.gradientStart.withOpacity(0.4),
-                    blurRadius: 20,
-                    spreadRadius: 2,
-                    offset: const Offset(0, 8),
-                  ),
-                  BoxShadow(
-                    color: widget.cardData.gradientEnd.withOpacity(0.3),
-                    blurRadius: 15,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : [
-                  BoxShadow(
-                    color: widget.theme.shadowColor.withOpacity(0.1),
-                    blurRadius: 15,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-        ),
-        transform: Matrix4.identity()..scale(_isHovered ? 1.03 : 1.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header: Icon and Title
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(AppDimensions.paddingSmall),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15), // Subtle icon background
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    widget.cardData.primaryIcon,
-                    color: Colors.white, // Icon color on gradient
-                    size: AppDimensions.iconSizeMedium,
-                  ),
+      onEnter: (_) => _handleHover(true),
+      onExit: (_) => _handleHover(false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: _handleTap,
+        child: AnimatedBuilder(
+          animation: Listenable.merge([_flipAnimation, _scaleAnimation]),
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _scaleAnimation.value,
+              child: SizedBox(
+                height: cardHeight,
+                width: double.infinity,
+                child: Stack(
+                  children: [
+                    // 🎨 Front card
+                    if (_flipAnimation.value <= 0.5)
+                      Transform(
+                        transform: Matrix4.identity()
+                          ..setEntry(3, 2, 0.001)
+                          ..rotateY(_flipAnimation.value * math.pi),
+                        alignment: Alignment.center,
+                        child: _buildSimpleFrontCard(cardHeight, isRTL),
+                      ),
+                    
+                    // 🎨 Back card
+                    if (_flipAnimation.value > 0.5)
+                      Transform(
+                        transform: Matrix4.identity()
+                          ..setEntry(3, 2, 0.001)
+                          ..rotateY((_flipAnimation.value - 1) * math.pi),
+                        alignment: Alignment.center,
+                        child: _buildSimpleBackCard(cardHeight, isRTL),
+                      ),
+                  ],
                 ),
-                const SizedBox(width: AppDimensions.paddingMedium),
-                Expanded(
-                  child: Text(
-                    widget.cardData.titleKey.tr(),
-                    style: widget.theme.textTheme.headlineSmall?.copyWith(
-                      color: Colors.white, // Title text color on gradient
-                      fontWeight: FontWeight.bold,
-                    ),
+              ),
+            );
+          },
+        ),
+      ),
+    )
+    .animate()
+    .fadeIn(delay: widget.delay, duration: 800.ms)
+    .slideY(begin: 0.2, duration: 800.ms);
+  }
+
+  /// 🎨 Simplified front card
+  Widget _buildSimpleFrontCard(double cardHeight, bool isRTL) {
+    return Container(
+      height: cardHeight,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: widget.theme.colorScheme.surface.withOpacity(0.9),
+        border: Border.all(
+          color: widget.cardData.primaryColor.withOpacity(0.3),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: widget.cardData.primaryColor.withOpacity(0.15),
+            blurRadius: 20,
+            spreadRadius: 0,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // 🎯 Simple icon
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: widget.cardData.primaryColor.withOpacity(0.1),
+              border: Border.all(
+                color: widget.cardData.primaryColor.withOpacity(0.3),
+                width: 2,
+              ),
+            ),
+            child: Icon(
+              widget.cardData.frontIcon,
+              size: 28,
+              color: widget.cardData.primaryColor,
+            ),
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // 🏷️ Title
+          Text(
+            widget.cardData.title,
+            style: widget.theme.textTheme.headlineSmall?.copyWith(
+              color: widget.theme.colorScheme.onSurface,
+              fontWeight: FontWeight.w700,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          
+          const SizedBox(height: 12),
+          
+          // 📝 Description
+          Text(
+            widget.cardData.frontDescription,
+            style: widget.theme.textTheme.titleMedium?.copyWith(
+              color: widget.cardData.primaryColor,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // 👆 Tap indicator
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: widget.cardData.primaryColor.withOpacity(0.1),
+              border: Border.all(
+                color: widget.cardData.primaryColor.withOpacity(0.2),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.touch_app_rounded,
+                  size: 16,
+                  color: widget.cardData.primaryColor,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Tap to explore',
+                  style: widget.theme.textTheme.bodySmall?.copyWith(
+                    color: widget.cardData.primaryColor,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: AppDimensions.paddingLarge),
+          ),
+        ],
+      ),
+    );
+  }
 
-            // Benefits List
-            Expanded(
-              child: ListView.builder(
-                itemCount: widget.cardData.benefits.length,
-                physics: const NeverScrollableScrollPhysics(), // Disable scrolling within card if height is fixed
-                itemBuilder: (context, index) {
-                  final benefit = widget.cardData.benefits[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: AppDimensions.paddingMedium),
-                    child: Row(
-                      children: [
-                        Text(
-                          benefit.emoji,
-                          style: const TextStyle(fontSize: 20), // Emoji size
+  /// 🎨 Simplified back card
+  Widget _buildSimpleBackCard(double cardHeight, bool isRTL) {
+    return Container(
+      height: cardHeight,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: widget.theme.colorScheme.surface.withOpacity(0.9),
+        border: Border.all(
+          color: widget.cardData.primaryColor.withOpacity(0.3),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: widget.cardData.primaryColor.withOpacity(0.15),
+            blurRadius: 20,
+            spreadRadius: 0,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 🏷️ Header
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: widget.cardData.primaryColor.withOpacity(0.1),
+                ),
+                child: Icon(
+                  widget.cardData.backIcon,
+                  color: widget.cardData.primaryColor,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  widget.cardData.title,
+                  style: widget.theme.textTheme.titleLarge?.copyWith(
+                    color: widget.theme.colorScheme.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // 📝 Description
+          Text(
+            widget.cardData.backDescription,
+            style: widget.theme.textTheme.bodyMedium?.copyWith(
+              color: widget.theme.colorScheme.onSurface.withOpacity(0.8),
+              height: 1.4,
+            ),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // 📋 Benefits list
+          Expanded(
+            child: Column(
+              children: widget.cardData.benefits.take(4).map((benefit) => 
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(top: 6),
+                        width: 4,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: widget.cardData.primaryColor,
                         ),
-                        const SizedBox(width: AppDimensions.paddingSmall),
-                        Expanded(
-                          child: Column(
-                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                benefit.textKey.tr(),
-                                style: widget.theme.textTheme.bodyLarge?.copyWith(
-                                  color: Colors.white.withOpacity(0.95), // Benefit text color
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              if (benefit.buzzword.isNotEmpty)
-                                Text(
-                                  benefit.buzzword,
-                                  style: widget.theme.textTheme.bodySmall?.copyWith(
-                                    color: Colors.white.withOpacity(0.7), // Buzzword color
-                                    fontStyle: FontStyle.italic
-                                  ),
-                                ),
-                            ],
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          benefit,
+                          style: widget.theme.textTheme.bodySmall?.copyWith(
+                            color: widget.theme.colorScheme.onSurface.withOpacity(0.8),
+                            height: 1.3,
                           ),
                         ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+                      ),
+                    ],
+                  ),
+                )
+              ).toList(),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
