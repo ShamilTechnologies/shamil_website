@@ -14,9 +14,9 @@ class AppAssets {
   static const String heroBanner2 = '$_images/hero_banner_2.png';
   static const String heroBanner3 = '$_images/hero_banner_3.png';
 
-  static const String shamilScreen1 = '$_images/shamilScreen1.png';
-  static const String shamilScreen2 = '$_images/shamilScreen2.png';
-  static const String shamilScreen3 = '$_images/shamilScreen3.png';
+  static const String shamilScreen1 = '$_images/shamilScreen1.jpg';
+  static const String shamilScreen2 = '$_images/shamilScreen2.jpg';
+  static const String shamilScreen3 = '$_images/shamilScreen3.jpg';
 
   // --- Rocket Image ---
   static const String rocketImagePng = '$_images/rocket_image.png';

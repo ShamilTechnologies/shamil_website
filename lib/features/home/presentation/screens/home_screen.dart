@@ -25,12 +25,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late ScrollController _scrollController;
-  
+
   // Section keys for navigation
   final GlobalKey _heroKey = GlobalKey();
   final GlobalKey _featuresKey = GlobalKey();
   final GlobalKey _aboutKey = GlobalKey();
-  final GlobalKey _downloadKey = GlobalKey(); 
+  final GlobalKey _downloadKey = GlobalKey();
   final GlobalKey _contactKey = GlobalKey();
 
   @override
@@ -50,13 +50,13 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
-      
+
       // ✅ Using the correct ModernAppBar
       appBar: ModernAppBar(
         scrollController: _scrollController,
         onMenuTap: _showMobileMenu,
       ),
-     
+
       body: SingleChildScrollView(
         controller: _scrollController,
         physics: const BouncingScrollPhysics(),
@@ -66,12 +66,14 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(key: _aboutKey, child: const IntroSection()),
             EnhancedRocketSeparatorSection(scrollController: _scrollController),
             MobileAppPagesSection(scrollController: _scrollController),
+            const HowItWorksSection(),
             Container(
               key: _featuresKey,
-              child: FeaturesHighlightSection(scrollController: _scrollController),
+              child: FeaturesHighlightSection(
+                scrollController: _scrollController,
+              ),
             ),
-            const BenefitsSection(),
-            const HowItWorksSection(),
+            // const BenefitsSection(),
             const TestimonialsSection(),
             Container(key: _downloadKey, child: const DownloadCtaSection()),
             Container(key: _contactKey, child: const FooterSection()),
@@ -93,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildMobileMenu() {
     final theme = Theme.of(context);
-    
+
     return DraggableScrollableSheet(
       initialChildSize: 0.6,
       minChildSize: 0.4,
@@ -105,15 +107,16 @@ class _HomeScreenState extends State<HomeScreen> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: theme.brightness == Brightness.light
-                  ? [
-                      Colors.white.withOpacity(0.98),
-                      Colors.grey.shade50.withOpacity(0.95),
-                    ]
-                  : [
-                      const Color(0xFF1A2332).withOpacity(0.98),
-                      const Color(0xFF0F1419).withOpacity(0.95),
-                    ],
+              colors:
+                  theme.brightness == Brightness.light
+                      ? [
+                        Colors.white.withOpacity(0.98),
+                        Colors.grey.shade50.withOpacity(0.95),
+                      ]
+                      : [
+                        const Color(0xFF1A2332).withOpacity(0.98),
+                        const Color(0xFF0F1419).withOpacity(0.95),
+                      ],
             ),
             border: Border.all(
               color: const Color(0xFF2A548D).withOpacity(0.2),
@@ -140,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
-              
+
               // Header
               Padding(
                 padding: const EdgeInsets.all(24),
@@ -178,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-              
+
               // Menu Items
               Expanded(
                 child: ListView(
@@ -266,11 +269,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  child: Icon(
-                    icon,
-                    color: Colors.white,
-                    size: 24,
-                  ),
+                  child: Icon(icon, color: Colors.white, size: 24),
                 ),
                 const SizedBox(width: 16),
                 Expanded(

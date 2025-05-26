@@ -38,12 +38,7 @@
   "featurePerformance": "Fast & Reliable",
   
   "howItWorksTitle": "How It Works",
-  "step1Title": "Find",
-  "step1Desc": "Search for services near you.",
-  "step2Title": "Book",
-  "step2Desc": "Choose a time and book instantly.",
-  "step3Title": "Enjoy",
-  "step3Desc": "Manage your booking and enjoy the service.",
+ 
   
   "appPreviewTitle": "See Shamil in Action",
   "previewSectionTitle": "Shamil: Smart, Simple, Secure.",
@@ -104,5 +99,22 @@
   "getShamilAppSubtitle": "Experience seamless service booking and management at your fingertips.",
   "testimonial1Author": "- Jane Doe, User",
   "getStartedWithShamil": "Get started with the smartest way to manage services.",
-  "learnMoreAbout": "Learn more about"
+  "learnMoreAbout": "Learn more about",
+
+  "step1Title": "Discover",
+  "step1Desc": "Find amazing services near you with AI-powered search",
+  "step1DetailedDesc": "Our intelligent search algorithm helps you discover the perfect services based on your location, preferences, and past bookings.",
+  
+  "step2Title": "Book Instantly",
+  "step2Desc": "Choose your preferred time and book with just a few taps",
+  "step2DetailedDesc": "Real-time availability updates ensure you can book exactly when you want, with instant confirmation and smart scheduling suggestions.",
+  
+  "step3Title": "Pay Securely", 
+  "step3Desc": "Safe and fast payments with multiple options",
+  "step3DetailedDesc": "Industry-leading security with multiple payment methods, instant receipts, and secure transaction processing.",
+  
+  "step4Title": "Enjoy Your Service",
+  "step4Desc": "Relax and enjoy your professionally delivered service",
+  "step4DetailedDesc": "Track your service in real-time, rate your experience, and easily rebook your favorite providers."
+
 }
