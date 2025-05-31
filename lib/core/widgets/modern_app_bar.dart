@@ -1,8 +1,6 @@
 // lib/core/widgets/modern_app_bar.dart
 
-import 'dart:html' as html;
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';

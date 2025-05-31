@@ -1,6 +1,5 @@
 // lib/features/provider/data/models/subscription_plan_model.dart
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart'; // For Color
 
 // Using keys from ProviderStrings for plan details

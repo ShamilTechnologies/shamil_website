@@ -360,7 +360,7 @@ class _HomeScreenState extends State<HomeScreen>
                               () => _scrollToSection(sectionData.key), 
                               theme,
                             ))
-                        .toList(),
+                        ,
                     
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16),

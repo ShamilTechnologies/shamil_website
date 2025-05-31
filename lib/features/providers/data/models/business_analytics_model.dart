@@ -1,6 +1,5 @@
 // lib/features/provider/data/models/business_analytics_model.dart
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart'; // For IconData
 
 enum TrendDirection { up, down, neutral }
