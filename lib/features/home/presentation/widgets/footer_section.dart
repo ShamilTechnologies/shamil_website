@@ -8,7 +8,7 @@ import 'package:shamil_web/core/constants/app_dimensions.dart';
 import 'package:shamil_web/core/constants/app_strings.dart';
 import 'package:shamil_web/core/constants/app_assets.dart';
 import 'package:shamil_web/core/utils/helpers.dart';
-import 'package:shamil_web/features/home/data/services/newsletter_service.dart'; // NEW
+// NEW
 import 'package:responsive_framework/responsive_framework.dart';
 
 /// 🚀 ENHANCED FOOTER WITH DATABASE INTEGRATION 🚀

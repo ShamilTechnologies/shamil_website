@@ -1,49 +1,35 @@
+// lib/core/navigation/app_router.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shamil_web/features/home/presentation/screens/home_screen.dart';
+// Ensure this path is correct once the file is created:
+import 'package:shamil_web/features/providers/presentation/screens/provider_services_screen.dart'; 
 
 class AppRouter {
-  // Private constructor
   AppRouter._();
 
-  // Define route constants for better management
   static const String homePath = '/';
-  // Add other paths if needed (e.g., /provider-join, /privacy-policy)
-  // static const String providerJoinPath = '/join';
+  static const String providerServicesPath = '/provider-services'; 
 
-  // GoRouter configuration
   static final GoRouter router = GoRouter(
-    initialLocation: homePath, // Start at the home page
-    debugLogDiagnostics: true, // Log routing events in debug mode
+    initialLocation: homePath,
+    debugLogDiagnostics: true, 
     routes: <RouteBase>[
       GoRoute(
         path: homePath,
-        name: 'home', // Optional name for navigation by name
+        name: 'home',
         builder: (BuildContext context, GoRouterState state) {
-          return const HomeScreen(); // Main landing page
+          return const HomeScreen();
         },
-        // Add sub-routes if your home page has sections navigated via URL
-        // routes: <RouteBase>[
-        //   // Example: If you had a separate page for providers
-        //   // GoRoute(
-        //   //   path: 'join', // becomes /join
-        //   //   name: 'provider-join',
-        //   //   builder: (BuildContext context, GoRouterState state) {
-        //   //     return const ProviderJoinScreen();
-        //   //   },
-        //   // ),
-        // ],
       ),
-      // Add other top-level routes here
-      // GoRoute(
-      //   path: providerJoinPath,
-      //   name: 'provider-join-alt', // Example alternative route
-      //   builder: (BuildContext context, GoRouterState state) {
-      //     return const ProviderJoinScreen(); // Placeholder
-      //   },
-      // ),
+      GoRoute(
+        path: providerServicesPath,
+        name: 'provider-services', 
+        builder: (BuildContext context, GoRouterState state) {
+          return const ProviderServicesScreen(); 
+        },
+      ),
     ],
-    // Optional: Error handling for unknown routes
     errorBuilder: (context, state) => Scaffold(
       appBar: AppBar(title: const Text('Page Not Found')),
       body: Center(

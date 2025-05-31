@@ -115,3 +115,126 @@ class AppStrings {
   static const String getStartedWithShamil = 'getStartedWithShamil';
   static const String learnMoreAbout = 'learnMoreAbout';
 }
+
+
+
+// lib/core/constants/provider_strings.dart
+
+class ProviderStrings {
+  // Page Meta
+  static const String providerPageTitle = 'providerPageTitle';
+  static const String providerPageDescription = 'providerPageDescription';
+
+  // General Navigation & Buttons
+  static const String joinOurNetwork = 'joinOurNetwork';
+  static const String startFreeTrial = 'startFreeTrial';
+  static const String contactSales = 'contactSales';
+  static const String getStarted = 'getStarted';
+  static const String choosePlan = 'choosePlan';
+  static const String contactUs = 'contactUs';
+  static const String getStartedToday = 'getStartedToday';
+  static const String learnMore = 'learnMore';
+
+  // Hero Section (ProviderHeroSection)
+  static const String heroTitle = 'providerHeroTitle';
+  static const String heroSubtitle = 'providerHeroSubtitle';
+
+  // Features Section (ProviderFeaturesSection)
+  static const String featuresSectionTitle = 'providerFeaturesSectionTitle';
+  static const String featuresSectionSubtitle = 'providerFeaturesSectionSubtitle';
+
+  static const String featureSmartBookingTitle = 'featureSmartBookingTitle';
+  static const String featureSmartBookingDesc = 'featureSmartBookingDesc';
+  static const String featureSmartBookingBenefit1 = 'featureSmartBookingBenefit1';
+  static const String featureSmartBookingBenefit2 = 'featureSmartBookingBenefit2';
+  static const String featureSmartBookingBenefit3 = 'featureSmartBookingBenefit3';
+
+  static const String featureSubscriptionManagementTitle = 'featureSubscriptionManagementTitle';
+  static const String featureSubscriptionManagementDesc = 'featureSubscriptionManagementDesc';
+  static const String featureSubscriptionManagementBenefit1 = 'featureSubscriptionManagementBenefit1';
+  static const String featureSubscriptionManagementBenefit2 = 'featureSubscriptionManagementBenefit2';
+  static const String featureSubscriptionManagementBenefit3 = 'featureSubscriptionManagementBenefit3';
+
+  static const String featureNfcQrAccessTitle = 'featureNfcQrAccessTitle';
+  static const String featureNfcQrAccessDesc = 'featureNfcQrAccessDesc';
+  static const String featureNfcQrAccessBenefit1 = 'featureNfcQrAccessBenefit1';
+  static const String featureNfcQrAccessBenefit2 = 'featureNfcQrAccessBenefit2';
+  static const String featureNfcQrAccessBenefit3 = 'featureNfcQrAccessBenefit3';
+
+  static const String featureAdvancedAnalyticsTitle = 'featureAdvancedAnalyticsTitle';
+  static const String featureAdvancedAnalyticsDesc = 'featureAdvancedAnalyticsDesc';
+  static const String featureAdvancedAnalyticsBenefit1 = 'featureAdvancedAnalyticsBenefit1';
+  static const String featureAdvancedAnalyticsBenefit2 = 'featureAdvancedAnalyticsBenefit2';
+  static const String featureAdvancedAnalyticsBenefit3 = 'featureAdvancedAnalyticsBenefit3';
+
+  static const String featureCustomerManagementTitle = 'featureCustomerManagementTitle';
+  static const String featureCustomerManagementDesc = 'featureCustomerManagementDesc';
+  static const String featureCustomerManagementBenefit1 = 'featureCustomerManagementBenefit1';
+  static const String featureCustomerManagementBenefit2 = 'featureCustomerManagementBenefit2';
+  static const String featureCustomerManagementBenefit3 = 'featureCustomerManagementBenefit3';
+
+  static const String featureCloudSyncTitle = 'featureCloudSyncTitle';
+  static const String featureCloudSyncDesc = 'featureCloudSyncDesc';
+  static const String featureCloudSyncBenefit1 = 'featureCloudSyncBenefit1';
+  static const String featureCloudSyncBenefit2 = 'featureCloudSyncBenefit2';
+  static const String featureCloudSyncBenefit3 = 'featureCloudSyncBenefit3';
+
+  // How It Works Section (ProviderHowItWorksSection)
+  static const String howItWorksSectionTitle = 'providerHowItWorksSectionTitle';
+  static const String stepSignUpTitle = 'stepSignUpTitle';
+  static const String stepSignUpDesc = 'stepSignUpDesc';
+  static const String stepAcceptBookingsTitle = 'stepAcceptBookingsTitle';
+  static const String stepAcceptBookingsDesc = 'stepAcceptBookingsDesc';
+  static const String stepGrowBusinessTitle = 'stepGrowBusinessTitle';
+  static const String stepGrowBusinessDesc = 'stepGrowBusinessDesc';
+
+  // Pricing Section (ProviderPricingSection)
+  static const String pricingSectionTitle = 'providerPricingSectionTitle';
+  static const String pricingSectionSubtitle = 'providerPricingSectionSubtitle';
+  static const String basePlanName = 'basePlanName';
+  static const String basePlanTarget = 'basePlanTarget';
+  static const String basePlanPrice = 'basePlanPrice'; // Value like "300-500"
+  static const String proPlanName = 'proPlanName';
+  static const String proPlanTarget = 'proPlanTarget';
+  static const String proPlanPrice = 'proPlanPrice'; // Value like "800-1,200"
+  static const String enterprisePlanName = 'enterprisePlanName';
+  static const String enterprisePlanTarget = 'enterprisePlanTarget';
+  static const String enterprisePlanPrice = 'enterprisePlanPrice'; // Value like "Contact for Quote"
+  static const String perMonth = 'perMonth'; // "/month"
+  static const String mostPopular = 'mostPopular';
+  static const String moneyBackGuarantee = 'moneyBackGuarantee';
+  static const String featureComparisonTitle = 'featureComparisonTitle';
+  
+  static const String pricingFeatureBookings = 'pricingFeatureBookings';
+  static const String pricingFeatureSubscriptions = 'pricingFeatureSubscriptions';
+  static const String pricingFeatureNfcQr = 'pricingFeatureNfcQr';
+  static const String pricingFeatureAnalytics = 'pricingFeatureAnalytics';
+  static const String pricingFeatureSupport = 'pricingFeatureSupport';
+
+  static const String bookingsBasic = 'bookingsBasic';
+  static const String bookingsAdvanced = 'bookingsAdvanced';
+  static const String bookingsFullyCustom = 'bookingsFullyCustom';
+  
+  static const String subscriptionsLimited = 'subscriptionsLimited';
+  static const String subscriptionsMultiple = 'subscriptionsMultiple';
+  static const String subscriptionsCustomRules = 'subscriptionsCustomRules';
+
+  static const String nfcQrStandard = 'nfcQrStandard';
+  static const String nfcQrHigherLimits = 'nfcQrHigherLimits';
+  static const String nfcQrCustomHighVolume = 'nfcQrCustomHighVolume';
+
+  static const String analyticsStandard = 'analyticsStandard';
+  static const String analyticsEnhanced = 'analyticsEnhanced';
+  static const String analyticsAdvancedBI = 'analyticsAdvancedBI';
+
+  static const String supportEmail = 'supportEmail';
+  static const String supportPriorityChat = 'supportPriorityChat';
+  static const String supportDedicatedManager = 'supportDedicatedManager';
+
+  // Final CTA Section (ProviderCtaSection)
+  static const String ctaTitle = 'providerCtaTitle';
+  static const String ctaSubtitle = 'providerCtaSubtitle';
+  static const String uptimeIndicator = 'uptimeIndicator';
+  static const String supportIndicator = 'supportIndicator';
+  static const String trustedByIndicator = 'trustedByIndicator';
+}

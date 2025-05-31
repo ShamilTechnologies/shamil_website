@@ -6,9 +6,12 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:go_router/go_router.dart'; // Import GoRouter
 import 'package:shamil_web/core/constants/app_assets.dart';
+import 'package:shamil_web/core/navigation/app_router.dart'; // Import AppRouter to access path constants
 import 'package:shamil_web/core/theme/theme_provider.dart';
 import 'package:shamil_web/core/localization/locale_provider.dart';
+import 'package:shamil_web/core/constants/app_strings.dart'; // Import AppStrings
 import 'package:responsive_framework/responsive_framework.dart';
 
 /// 🌊 Ultra Modern App Bar with Enhanced Animations
@@ -23,7 +26,7 @@ class ModernAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(100);
+  Size get preferredSize => const Size.fromHeight(100); // Adjusted height if needed
 
   @override
   ConsumerState<ModernAppBar> createState() => _ModernAppBarState();
@@ -38,13 +41,12 @@ class _ModernAppBarState extends ConsumerState<ModernAppBar>
   // State Variables
   double _scrollOffset = 0;
   double _logoRotation = 0;
-  bool _isDownloading = false;
-  bool _isDownloadHovered = false;
+  // Removed _isDownloading and _isDownloadHovered as the download button is removed
 
   // Constants
   static const _primaryColor = Color(0xFF2A548D);
   static const _goldColor = Color(0xFFD8A31A);
-  static const _logoSize = 85.0;
+  static const _logoSize = 65.0; // Slightly adjusted logo size for balance
 
   @override
   void initState() {
@@ -81,7 +83,7 @@ class _ModernAppBarState extends ConsumerState<ModernAppBar>
     final offset = widget.scrollController.offset;
     setState(() {
       _scrollOffset = offset;
-      _logoRotation = (offset * 0.003) % (2 * math.pi);
+      _logoRotation = (offset * 0.002) % (2 * math.pi); // Slightly reduced rotation speed
     });
   }
 
@@ -89,69 +91,64 @@ class _ModernAppBarState extends ConsumerState<ModernAppBar>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isMobile = ResponsiveBreakpoints.of(context).smallerOrEqualTo(MOBILE);
-    final opacity = (_scrollOffset / 400).clamp(0.0, 0.9);
+    // Make opacity transition smoother and start a bit earlier
+    final opacity = (_scrollOffset / 300).clamp(0.0, 1.0); 
     
     return Container(
-      margin: const EdgeInsets.all(20),
+      // Reduced margin for a sleeker look, more noticeable on smaller screens
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), 
       decoration: _buildAppBarDecoration(theme, opacity),
       child: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
-        toolbarHeight: 300,
+        toolbarHeight: 70, // Adjusted toolbar height
+        leadingWidth: _logoSize + 32, // Adjust leadingWidth to fit logo + padding
         leading: _buildEnhancedLogo(),
-        actions: _buildActions(isMobile),
+        actions: _buildActions(isMobile, theme), // Pass theme to actions
       ),
     );
   }
 
   BoxDecoration _buildAppBarDecoration(ThemeData theme, double opacity) {
+    // More subtle background transition, using surface color mixed with primary
+    final Color lightBgColor = Color.lerp(Colors.white.withOpacity(0.5), theme.colorScheme.surface.withOpacity(0.5), opacity)!;
+    final Color darkBgColor = Color.lerp(Colors.black.withOpacity(0.3), theme.colorScheme.surface.withOpacity(0.3), opacity)!;
+
     return BoxDecoration(
-      borderRadius: BorderRadius.circular(50),
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: theme.brightness == Brightness.light
-            ? [
-                Colors.white.withOpacity(opacity * 0.95),
-                Colors.white.withOpacity(opacity * 0.8),
-              ]
-            : [
-                Colors.black.withOpacity(opacity * 0.9),
-                Colors.grey.shade800.withOpacity(opacity * 0.7),
-              ],
-      ),
+      borderRadius: BorderRadius.circular(35), // Slightly less rounded
+      color: theme.brightness == Brightness.light ? lightBgColor : darkBgColor,
       border: Border.all(
-        color: _primaryColor.withOpacity(0.2),
-        width: 1.5,
+        color: _primaryColor.withOpacity(0.1 + opacity * 0.1), // Border opacity reacts to scroll
+        width: 1,
       ),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.12),
-          blurRadius: 35,
-          offset: const Offset(0, 10),
+          color: Colors.black.withOpacity(0.05 + opacity * 0.07),
+          blurRadius: 20 + opacity * 15, // Shadow intensity reacts to scroll
+          offset: Offset(0, 5 + opacity * 5),
         ),
       ],
     );
   }
 
-  List<Widget> _buildActions(bool isMobile) {
+  List<Widget> _buildActions(bool isMobile, ThemeData theme) { // Added theme parameter
     return [
       if (!isMobile) ...[
-        _buildCleanDownloadButton(),
-        const SizedBox(width: 16),
-        _buildLanguageButton(),
-        const SizedBox(width: 16),
-        _buildThemeButton(),
+        _buildJoinProviderButton(theme), // Pass theme
+        const SizedBox(width: 12), // Adjusted spacing
+        _buildLanguageButton(theme),   // Pass theme
+        const SizedBox(width: 12), // Adjusted spacing
+        _buildThemeButton(theme),      // Pass theme
       ] else
-        _buildMobileMenuButton(),
-      const SizedBox(width: 24),
+        _buildMobileMenuButton(theme), // Pass theme
+      const SizedBox(width: 16), // Adjusted spacing
     ];
   }
 
   Widget _buildEnhancedLogo() {
-    return Container(
-      margin: const EdgeInsets.only(left: 20, top: 18, bottom: 18, right: 12),
+    return Padding( // Changed Container to Padding
+      padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8, right: 8), // Adjusted padding
       child: Transform.rotate(
         angle: _logoRotation,
         child: Image.asset(
@@ -179,228 +176,194 @@ class _ModernAppBarState extends ConsumerState<ModernAppBar>
     );
   }
 
-  Widget _buildCleanDownloadButton() {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    
-    // Clean theme-based colors
-    final borderColor = isDark ? _goldColor : _primaryColor;
-    final textColor = isDark ? _goldColor : _primaryColor;
-    final hoverScale = _isDownloadHovered ? 1.15 : 1.0; // Bigger hover effect
-    
-    return MouseRegion(
-      onEnter: (_) => _setDownloadHover(true),
-      onExit: (_) => _setDownloadHover(false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-        transform: Matrix4.identity()..scale(hoverScale),
-        child: Container(
-          height: 48,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: borderColor,
-              width: 2,
-            ),
-            color: Colors.transparent,
-            boxShadow: _isDownloadHovered ? [
-              BoxShadow(
-                color: borderColor.withOpacity(0.2),
-                blurRadius: 16,
-                spreadRadius: 2,
-                offset: const Offset(0, 6),
+  // New "Join as Provider" Button
+  Widget _buildJoinProviderButton(ThemeData theme) {
+    bool isHovered = false; // Local hover state for this button
+
+    return StatefulBuilder(
+      builder: (context, setButtonState) {
+        return MouseRegion(
+          onEnter: (_) => setButtonState(() => isHovered = true),
+          onExit: (_) => setButtonState(() => isHovered = false),
+          cursor: SystemMouseCursors.click,
+          child: AnimatedScale(
+            scale: isHovered ? 1.05 : 1.0,
+            duration: const Duration(milliseconds: 200),
+            child: TextButton.icon(
+              onPressed: () {
+                // *** FIXED ERROR HERE ***
+                // Changed AppRouter.providerJoinPath to AppRouter.providerServicesPath
+                context.go(AppRouter.providerServicesPath); // Navigate using GoRouter 
+              },
+              icon: Icon(Icons.storefront_outlined, size: 18, color: isHovered ? _goldColor : _primaryColor),
+              label: Text(
+                AppStrings.joinProvider.tr(),
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: isHovered ? _goldColor : _primaryColor,
+                ),
               ),
-            ] : [],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: _handleDownload,
-              borderRadius: BorderRadius.circular(12),
-              splashColor: borderColor.withOpacity(0.1),
-              highlightColor: borderColor.withOpacity(0.05),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildDownloadIcon(textColor),
-                    const SizedBox(width: 8),
-                    _buildDownloadText(textColor),
-                  ],
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                backgroundColor: (isHovered ? _primaryColor : _primaryColor.withOpacity(0.1)).withOpacity(0.1),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  side: BorderSide(color: isHovered ? _goldColor.withOpacity(0.5) : _primaryColor.withOpacity(0.3), width: 1.5)
                 ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      }
     );
   }
 
-  Widget _buildDownloadIcon(Color iconColor) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
-      child: _isDownloading
-          ? SizedBox(
-              key: const ValueKey('loading'),
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation(iconColor),
-              ),
-            )
-          : Icon(
-              key: const ValueKey('download'),
-              Icons.download_rounded,
-              color: iconColor,
-              size: 18,
-            ),
-    );
-  }
 
-  Widget _buildDownloadText(Color textColor) {
-    return AnimatedDefaultTextStyle(
-      duration: const Duration(milliseconds: 200),
-      style: TextStyle(
-        color: textColor,
-        fontWeight: FontWeight.w600,
-        fontSize: 14,
-      ),
-      child: Text(_isDownloading ? 'Loading...' : 'Download'),
-    );
-  }
-
-  Widget _buildLanguageButton() {
+  Widget _buildLanguageButton(ThemeData theme) { // Added theme parameter
     final currentLocale = context.locale;
     final isArabic = currentLocale.languageCode == 'ar';
-    
-    return GestureDetector(
-      onTap: _toggleLanguage,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
-          borderRadius: BorderRadius.circular(25),
-          border: Border.all(
-            color: _primaryColor.withOpacity(0.3),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              isArabic ? 'EN' : 'AR',
-              style: TextStyle(
-                color: _primaryColor,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+     bool isHovered = false;
+
+    return StatefulBuilder(
+      builder: (context, setButtonState) {
+        return MouseRegion(
+          onEnter: (_) => setButtonState(() => isHovered = true),
+          onExit: (_) => setButtonState(() => isHovered = false),
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: _toggleLanguage,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // Adjusted padding
+              decoration: BoxDecoration(
+                color: isHovered ? _primaryColor.withOpacity(0.15) : theme.colorScheme.surface.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(25),
+                border: Border.all(
+                  color: _primaryColor.withOpacity(isHovered ? 0.5 : 0.2),
+                  width: 1,
+                ),
+                 boxShadow: isHovered ? [
+                  BoxShadow(
+                    color: _primaryColor.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ] : [],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    isArabic ? 'EN' : 'AR',
+                    style: TextStyle(
+                      color: _primaryColor,
+                      fontSize: 13, // Adjusted font size
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 6), // Adjusted spacing
+                  Icon(
+                    Icons.translate_rounded, // Changed icon
+                    color: _primaryColor,
+                    size: 18, // Adjusted icon size
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: 12),
-            Icon(
-              Icons.language_rounded,
-              color: _primaryColor,
-              size: 20,
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      }
     );
   }
 
-  Widget _buildThemeButton() {
+  Widget _buildThemeButton(ThemeData theme) { // Added theme parameter
     final themeMode = ref.watch(themeProvider);
     final isDark = _isDarkMode(themeMode);
-    
-    return GestureDetector(
-      onTap: _toggleTheme,
-      child: Container(
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.transparent,
-          border: Border.all(
-            color: isDark ? Colors.amber : _primaryColor,
-            width: 2.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: (isDark ? Colors.amber : _primaryColor).withOpacity(0.3),
-              blurRadius: 15,
-              offset: const Offset(0, 4),
+    bool isHovered = false;
+
+    return StatefulBuilder(
+      builder: (context, setButtonState) {
+        return MouseRegion(
+          onEnter: (_) => setButtonState(() => isHovered = true),
+          onExit: (_) => setButtonState(() => isHovered = false),
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: _toggleTheme,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 42, // Adjusted size
+              height: 42, // Adjusted size
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isHovered ? (isDark ? Colors.amber.withOpacity(0.2) : _primaryColor.withOpacity(0.15)) : theme.colorScheme.surface.withOpacity(0.05),
+                border: Border.all(
+                  color: isDark ? Colors.amber.withOpacity(isHovered ? 0.7 : 0.4) : _primaryColor.withOpacity(isHovered ? 0.5 : 0.2),
+                  width: 1.5, // Adjusted border width
+                ),
+                boxShadow: isHovered ? [
+                  BoxShadow(
+                    color: (isDark ? Colors.amber : _primaryColor).withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ] : [],
+              ),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+                child: Icon(
+                  isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded, // Changed icons
+                  key: ValueKey(isDark),
+                  color: isDark ? Colors.amber : _primaryColor,
+                  size: 20, // Adjusted icon size
+                ),
+              ),
             ),
-          ],
-        ),
-        child: Container(
-          margin: const EdgeInsets.all(3),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Theme.of(context).colorScheme.surface.withOpacity(0.1),
           ),
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: Icon(
-              isDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
-              key: ValueKey(isDark),
-              color: isDark ? Colors.amber : _primaryColor,
-              size: 22,
-            ),
-          ),
-        ),
-      ),
+        );
+      }
     );
   }
 
-  Widget _buildMobileMenuButton() {
-    return GestureDetector(
-      onTap: widget.onMenuTap ?? () {},
-      child: Container(
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
-          border: Border.all(
-            color: _primaryColor.withOpacity(0.2),
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+  Widget _buildMobileMenuButton(ThemeData theme) { // Added theme parameter
+     bool isHovered = false;
+    return StatefulBuilder(
+      builder: (context, setButtonState) {
+        return MouseRegion(
+          onEnter: (_) => setButtonState(() => isHovered = true),
+          onExit: (_) => setButtonState(() => isHovered = false),
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: widget.onMenuTap ?? () {},
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 42, // Adjusted size
+              height: 42, // Adjusted size
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isHovered ? _primaryColor.withOpacity(0.1) : theme.colorScheme.surface.withOpacity(0.05),
+                border: Border.all(
+                  color: _primaryColor.withOpacity(isHovered ? 0.4 : 0.2),
+                  width: 1,
+                ),
+                 boxShadow: isHovered ? [
+                  BoxShadow(
+                    color: _primaryColor.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ] : [],
+              ),
+              child: Icon(
+                Icons.segment_rounded, // Changed icon
+                color: _primaryColor,
+                size: 22, // Adjusted icon size
+              ),
             ),
-          ],
-        ),
-        child: Icon(
-          Icons.menu_rounded,
-          color: _primaryColor,
-          size: 24,
-        ),
-      ),
+          ),
+        );
+      }
     );
-  }
-
-  // ===== EVENT HANDLERS =====
-
-  void _setDownloadHover(bool isHovered) {
-    setState(() => _isDownloadHovered = isHovered);
-    if (isHovered) {
-      _hoverController.forward();
-    } else {
-      _hoverController.reverse();
-    }
   }
 
   void _toggleLanguage() {
@@ -420,90 +383,5 @@ class _ModernAppBarState extends ConsumerState<ModernAppBar>
         (themeMode == ThemeMode.system &&
             MediaQuery.platformBrightnessOf(context) == Brightness.dark);
   }
-
-  Future<void> _handleDownload() async {
-    if (_isDownloading) return;
-    
-    setState(() => _isDownloading = true);
-    
-    try {
-      await _showDownloadDialog();
-    } catch (e) {
-      _showMessage('Download failed. Try again.', isError: true);
-    } finally {
-      if (mounted) {
-        setState(() => _isDownloading = false);
-      }
-    }
-  }
-
-  // ===== UTILITY METHODS =====
-
-  Future<void> _showDownloadDialog() async {
-    final theme = Theme.of(context);
-    
-    return showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 360),
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(32),
-            color: theme.colorScheme.surface,
-            border: Border.all(color: _primaryColor.withOpacity(0.1)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 40,
-                offset: const Offset(0, 20),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Download Shamil',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showMessage(String message, {bool isError = false}) {
-    if (!mounted) return;
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              isError ? Icons.error_rounded : Icons.check_circle_rounded,
-              color: Colors.white,
-              size: 18,
-            ),
-            const SizedBox(width: 8),
-            Text(message),
-          ],
-        ),
-        backgroundColor: isError ? Colors.red.shade400 : Colors.green.shade400,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
-  }
+  // Removed _handleDownload, _showDownloadDialog, _showMessage as download button is removed
 }
