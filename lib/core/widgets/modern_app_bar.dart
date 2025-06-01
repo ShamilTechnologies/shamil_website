@@ -4,18 +4,18 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:go_router/go_router.dart'; // Import GoRouter
+import 'package:go_router/go_router.dart';
 import 'package:shamil_web/core/constants/app_assets.dart';
-import 'package:shamil_web/core/navigation/app_router.dart'; // Import AppRouter to access path constants
+import 'package:shamil_web/core/navigation/app_router.dart'; // Corrected: Ensure this import provides AppRouter.providerServicesPath
 import 'package:shamil_web/core/theme/theme_provider.dart';
 import 'package:shamil_web/core/localization/locale_provider.dart';
-import 'package:shamil_web/core/constants/app_strings.dart'; // Import AppStrings
+import 'package:shamil_web/core/constants/app_strings.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-/// 🌊 Ultra Modern App Bar with Enhanced Animations
+// 🌊 Ultra Modern App Bar with Enhanced Animations & Corrected Navigation 🌊
 class ModernAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget {
   final ScrollController scrollController;
-  final VoidCallback? onMenuTap;
+  final VoidCallback? onMenuTap; // For mobile menu
 
   const ModernAppBar({
     super.key,
@@ -24,7 +24,7 @@ class ModernAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(100); // Adjusted height if needed
+  Size get preferredSize => const Size.fromHeight(100); // Adjusted height for a more prominent app bar
 
   @override
   ConsumerState<ModernAppBar> createState() => _ModernAppBarState();
@@ -34,17 +34,16 @@ class _ModernAppBarState extends ConsumerState<ModernAppBar>
     with TickerProviderStateMixin {
   
   // Animation Controllers
-  late AnimationController _hoverController;
+  late AnimationController _hoverController; // General hover effects for buttons if needed
   
   // State Variables
   double _scrollOffset = 0;
-  double _logoRotation = 0;
-  // Removed _isDownloading and _isDownloadHovered as the download button is removed
+  double _logoRotation = 0; // For the rotating logo effect
 
-  // Constants
-  static const _primaryColor = Color(0xFF2A548D);
-  static const _goldColor = Color(0xFFD8A31A);
-  static const _logoSize = 65.0; // Slightly adjusted logo size for balance
+  // Constants for styling
+  static const _primaryColor = Color(0xFF2A548D); // Shamil Blue
+  static const _goldColor = Color(0xFFD8A31A);    // Shamil Gold
+  static const _logoSize = 60.0; // Slightly smaller logo for a sleeker look
 
   @override
   void initState() {
@@ -61,9 +60,10 @@ class _ModernAppBarState extends ConsumerState<ModernAppBar>
 
   void _initializeAnimations() {
     _hoverController = AnimationController(
-      duration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 200), // Quick hover transitions
       vsync: this,
     );
+    // Other specific animation controllers can be initialized here if needed
   }
 
   void _setupScrollListener() {
@@ -72,16 +72,17 @@ class _ModernAppBarState extends ConsumerState<ModernAppBar>
 
   void _disposeControllers() {
     _hoverController.dispose();
-    widget.scrollController.removeListener(_onScroll);
+    // Ensure to remove listener to prevent memory leaks
+    widget.scrollController.removeListener(_onScroll); 
   }
 
   void _onScroll() {
-    if (!mounted) return;
+    if (!mounted) return; // Check if the widget is still in the tree
     
     final offset = widget.scrollController.offset;
     setState(() {
       _scrollOffset = offset;
-      _logoRotation = (offset * 0.002) % (2 * math.pi); // Slightly reduced rotation speed
+      _logoRotation = (offset * 0.0015) % (2 * math.pi); // Slightly slower, smoother rotation
     });
   }
 
@@ -89,124 +90,121 @@ class _ModernAppBarState extends ConsumerState<ModernAppBar>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isMobile = ResponsiveBreakpoints.of(context).smallerOrEqualTo(MOBILE);
-    // Make opacity transition smoother and start a bit earlier
-    final opacity = (_scrollOffset / 300).clamp(0.0, 1.0); 
+    // Opacity transition for app bar background based on scroll
+    final opacity = (_scrollOffset / 250.0).clamp(0.0, 1.0); // Start transition a bit earlier
     
     return Container(
-      // Reduced margin for a sleeker look, more noticeable on smaller screens
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), 
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // Reduced vertical margin
       decoration: _buildAppBarDecoration(theme, opacity),
       child: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        toolbarHeight: 70, // Adjusted toolbar height
-        leadingWidth: _logoSize + 32, // Adjust leadingWidth to fit logo + padding
+        backgroundColor: Colors.transparent, // AppBar itself is transparent
+        elevation: 0, // No shadow from AppBar widget, handled by container
+        automaticallyImplyLeading: false, // We handle our own leading widget
+        toolbarHeight: 70, // Consistent toolbar height
+        leadingWidth: _logoSize + 24, // Adjusted leading width
         leading: _buildEnhancedLogo(),
-        actions: _buildActions(isMobile, theme), // Pass theme to actions
+        actions: _buildActions(isMobile, theme),
       ),
     );
   }
 
+  // 🎨 AppBar background decoration with scroll-based effects
   BoxDecoration _buildAppBarDecoration(ThemeData theme, double opacity) {
-    // More subtle background transition, using surface color mixed with primary
-    final Color lightBgColor = Color.lerp(Colors.white.withOpacity(0.5), theme.colorScheme.surface.withOpacity(0.5), opacity)!;
-    final Color darkBgColor = Color.lerp(Colors.black.withOpacity(0.3), theme.colorScheme.surface.withOpacity(0.3), opacity)!;
+    // Smoother background color transition
+    final Color lightBgColor = Color.lerp(Colors.white.withOpacity(0.6), theme.colorScheme.surface.withOpacity(0.75), opacity)!;
+    final Color darkBgColor = Color.lerp(Colors.black.withOpacity(0.4), theme.colorScheme.surface.withOpacity(0.65), opacity)!;
 
     return BoxDecoration(
-      borderRadius: BorderRadius.circular(35), // Slightly less rounded
+      borderRadius: BorderRadius.circular(30), // Slightly softer radius
       color: theme.brightness == Brightness.light ? lightBgColor : darkBgColor,
       border: Border.all(
-        color: _primaryColor.withOpacity(0.1 + opacity * 0.1), // Border opacity reacts to scroll
+        color: _primaryColor.withOpacity(0.08 + opacity * 0.12), // Subtle border, reactive
         width: 1,
       ),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.05 + opacity * 0.07),
-          blurRadius: 20 + opacity * 15, // Shadow intensity reacts to scroll
-          offset: Offset(0, 5 + opacity * 5),
+          color: Colors.black.withOpacity(0.04 + opacity * 0.06), // Softer shadow, reactive
+          blurRadius: 15 + opacity * 10,
+          offset: Offset(0, 4 + opacity * 4),
         ),
       ],
     );
   }
 
-  List<Widget> _buildActions(bool isMobile, ThemeData theme) { // Added theme parameter
+  // 🔧 Building action buttons for the AppBar
+  List<Widget> _buildActions(bool isMobile, ThemeData theme) {
     return [
       if (!isMobile) ...[
-        _buildJoinProviderButton(theme), // Pass theme
-        const SizedBox(width: 12), // Adjusted spacing
-        _buildLanguageButton(theme),   // Pass theme
-        const SizedBox(width: 12), // Adjusted spacing
-        _buildThemeButton(theme),      // Pass theme
+        _buildJoinProviderButton(theme),
+        const SizedBox(width: 10), // Reduced spacing
+        _buildLanguageButton(theme),
+        const SizedBox(width: 10),
+        _buildThemeButton(theme),
       ] else
-        _buildMobileMenuButton(theme), // Pass theme
-      const SizedBox(width: 16), // Adjusted spacing
+        _buildMobileMenuButton(theme),
+      const SizedBox(width: 12), // Consistent end spacing
     ];
   }
 
+  // 🖼️ Enhanced logo with rotation
   Widget _buildEnhancedLogo() {
-    return Padding( // Changed Container to Padding
-      padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8, right: 8), // Adjusted padding
+    return Padding(
+      padding: const EdgeInsets.only(left: 12, top: 5, bottom: 5, right: 5), // Adjusted padding for centering
       child: Transform.rotate(
         angle: _logoRotation,
         child: Image.asset(
-          AppAssets.logo,
+          AppAssets.logo, // Make sure AppAssets.logo is correctly defined
           width: _logoSize,
           height: _logoSize,
           fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) => Container(
+          errorBuilder: (_, __, ___) => Container( // Fallback if logo fails to load
             width: _logoSize,
             height: _logoSize,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [_primaryColor, _primaryColor.withOpacity(0.7)],
-              ),
+              gradient: LinearGradient(colors: [_primaryColor, _goldColor]),
             ),
-            child: Icon(
-              Icons.rocket_launch_rounded,
-              size: _logoSize * 0.6,
-              color: Colors.white,
-            ),
+            child: Icon(Icons.rocket_launch, size: _logoSize * 0.55, color: Colors.white),
           ),
         ),
       ),
     );
   }
 
-  // New "Join as Provider" Button
+  // 🚀 "Join as Provider" Button
   Widget _buildJoinProviderButton(ThemeData theme) {
-    bool isHovered = false; // Local hover state for this button
+    // Local hover state for individual button animations if needed, or use a shared controller
+    bool isHovered = false; 
 
-    return StatefulBuilder(
+    return StatefulBuilder( // To manage local hover state if not using a global controller
       builder: (context, setButtonState) {
         return MouseRegion(
           onEnter: (_) => setButtonState(() => isHovered = true),
           onExit: (_) => setButtonState(() => isHovered = false),
           cursor: SystemMouseCursors.click,
           child: AnimatedScale(
-            scale: isHovered ? 1.05 : 1.0,
-            duration: const Duration(milliseconds: 200),
+            scale: isHovered ? 1.08 : 1.0, // Enhanced hover scale
+            duration: const Duration(milliseconds: 150),
             child: TextButton.icon(
               onPressed: () {
-                // *** FIXED ERROR HERE ***
-                // Changed AppRouter.providerJoinPath to AppRouter.providerServicesPath
-                context.go(AppRouter.providerServicesPath); // Navigate using GoRouter 
+                // ✅ Corrected Navigation Path: Using AppRouter.providerServicesPath
+                context.go(AppRouter.providerServicesPath); 
               },
-              icon: Icon(Icons.storefront_outlined, size: 18, color: isHovered ? _goldColor : _primaryColor),
+              icon: Icon(Icons.storefront_rounded, size: 18, color: isHovered ? _goldColor : _primaryColor),
               label: Text(
                 AppStrings.joinProvider.tr(),
                 style: TextStyle(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w600, // Bolder text
                   color: isHovered ? _goldColor : _primaryColor,
+                  fontSize: 13, // Slightly smaller for app bar
                 ),
               ),
               style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                backgroundColor: (isHovered ? _primaryColor : _primaryColor.withOpacity(0.1)).withOpacity(0.1),
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10), // Adjusted padding
+                backgroundColor: (isHovered ? _primaryColor.withOpacity(0.1) : Colors.transparent), // Subtle background on hover
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25),
-                  side: BorderSide(color: isHovered ? _goldColor.withOpacity(0.5) : _primaryColor.withOpacity(0.3), width: 1.5)
+                  borderRadius: BorderRadius.circular(20), // Softer radius
+                  side: BorderSide(color: isHovered ? _goldColor.withOpacity(0.7) : _primaryColor.withOpacity(0.4), width: 1)
                 ),
               ),
             ),
@@ -216,11 +214,11 @@ class _ModernAppBarState extends ConsumerState<ModernAppBar>
     );
   }
 
-
-  Widget _buildLanguageButton(ThemeData theme) { // Added theme parameter
+  // 🌍 Language Switcher Button
+  Widget _buildLanguageButton(ThemeData theme) {
     final currentLocale = context.locale;
     final isArabic = currentLocale.languageCode == 'ar';
-     bool isHovered = false;
+    bool isHovered = false;
 
     return StatefulBuilder(
       builder: (context, setButtonState) {
@@ -231,40 +229,19 @@ class _ModernAppBarState extends ConsumerState<ModernAppBar>
           child: GestureDetector(
             onTap: _toggleLanguage,
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // Adjusted padding
+              duration: const Duration(milliseconds: 150),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: isHovered ? _primaryColor.withOpacity(0.15) : theme.colorScheme.surface.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(25),
-                border: Border.all(
-                  color: _primaryColor.withOpacity(isHovered ? 0.5 : 0.2),
-                  width: 1,
-                ),
-                 boxShadow: isHovered ? [
-                  BoxShadow(
-                    color: _primaryColor.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ] : [],
+                color: isHovered ? _primaryColor.withOpacity(0.1) : theme.colorScheme.surface.withOpacity(0.03),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: _primaryColor.withOpacity(isHovered ? 0.4 : 0.15), width: 1),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    isArabic ? 'EN' : 'AR',
-                    style: TextStyle(
-                      color: _primaryColor,
-                      fontSize: 13, // Adjusted font size
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(width: 6), // Adjusted spacing
-                  Icon(
-                    Icons.translate_rounded, // Changed icon
-                    color: _primaryColor,
-                    size: 18, // Adjusted icon size
-                  ),
+                  Text(isArabic ? 'EN' : 'AR', style: TextStyle(color: _primaryColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 5),
+                  Icon(Icons.translate, color: _primaryColor, size: 16),
                 ],
               ),
             ),
@@ -274,7 +251,8 @@ class _ModernAppBarState extends ConsumerState<ModernAppBar>
     );
   }
 
-  Widget _buildThemeButton(ThemeData theme) { // Added theme parameter
+  // 🌓 Theme Switcher Button
+  Widget _buildThemeButton(ThemeData theme) {
     final themeMode = ref.watch(themeProvider);
     final isDark = _isDarkMode(themeMode);
     bool isHovered = false;
@@ -288,32 +266,24 @@ class _ModernAppBarState extends ConsumerState<ModernAppBar>
           child: GestureDetector(
             onTap: _toggleTheme,
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 42, // Adjusted size
-              height: 42, // Adjusted size
+              duration: const Duration(milliseconds: 150),
+              width: 40, height: 40,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isHovered ? (isDark ? Colors.amber.withOpacity(0.2) : _primaryColor.withOpacity(0.15)) : theme.colorScheme.surface.withOpacity(0.05),
+                color: isHovered ? (isDark ? Colors.amber.withOpacity(0.15) : _primaryColor.withOpacity(0.1)) : theme.colorScheme.surface.withOpacity(0.03),
                 border: Border.all(
-                  color: isDark ? Colors.amber.withOpacity(isHovered ? 0.7 : 0.4) : _primaryColor.withOpacity(isHovered ? 0.5 : 0.2),
-                  width: 1.5, // Adjusted border width
+                  color: isDark ? Colors.amber.withOpacity(isHovered ? 0.6 : 0.3) : _primaryColor.withOpacity(isHovered ? 0.4 : 0.15),
+                  width: 1,
                 ),
-                boxShadow: isHovered ? [
-                  BoxShadow(
-                    color: (isDark ? Colors.amber : _primaryColor).withOpacity(0.2),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ] : [],
               ),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
+              child: AnimatedSwitcher( // Smooth icon transition
+                duration: const Duration(milliseconds: 250),
                 transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
                 child: Icon(
-                  isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded, // Changed icons
-                  key: ValueKey(isDark),
+                  isDark ? Icons.light_mode : Icons.dark_mode,
+                  key: ValueKey(isDark), // Important for AnimatedSwitcher
                   color: isDark ? Colors.amber : _primaryColor,
-                  size: 20, // Adjusted icon size
+                  size: 18,
                 ),
               ),
             ),
@@ -323,8 +293,9 @@ class _ModernAppBarState extends ConsumerState<ModernAppBar>
     );
   }
 
-  Widget _buildMobileMenuButton(ThemeData theme) { // Added theme parameter
-     bool isHovered = false;
+  // 📱 Mobile Menu Button
+  Widget _buildMobileMenuButton(ThemeData theme) {
+    bool isHovered = false;
     return StatefulBuilder(
       builder: (context, setButtonState) {
         return MouseRegion(
@@ -332,31 +303,16 @@ class _ModernAppBarState extends ConsumerState<ModernAppBar>
           onExit: (_) => setButtonState(() => isHovered = false),
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
-            onTap: widget.onMenuTap ?? () {},
+            onTap: widget.onMenuTap ?? () {}, // Call onMenuTap if provided
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 42, // Adjusted size
-              height: 42, // Adjusted size
+              duration: const Duration(milliseconds: 150),
+              width: 40, height: 40,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isHovered ? _primaryColor.withOpacity(0.1) : theme.colorScheme.surface.withOpacity(0.05),
-                border: Border.all(
-                  color: _primaryColor.withOpacity(isHovered ? 0.4 : 0.2),
-                  width: 1,
-                ),
-                 boxShadow: isHovered ? [
-                  BoxShadow(
-                    color: _primaryColor.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ] : [],
+                color: isHovered ? _primaryColor.withOpacity(0.08) : theme.colorScheme.surface.withOpacity(0.03),
+                border: Border.all(color: _primaryColor.withOpacity(isHovered ? 0.35 : 0.15), width: 1),
               ),
-              child: Icon(
-                Icons.segment_rounded, // Changed icon
-                color: _primaryColor,
-                size: 22, // Adjusted icon size
-              ),
+              child: Icon(Icons.segment, color: _primaryColor, size: 20), // Using segment icon for menu
             ),
           ),
         );
@@ -364,22 +320,25 @@ class _ModernAppBarState extends ConsumerState<ModernAppBar>
     );
   }
 
+  // 🛠️ Helper methods for toggling theme and language
   void _toggleLanguage() {
     final currentLocale = context.locale;
     final newLocale = currentLocale.languageCode == 'ar' 
         ? const Locale('en') 
         : const Locale('ar');
-    ref.read(localeProvider.notifier).setLocale(context, newLocale);
+    // Ensure LocaleProvider is correctly set up and accessible via ref
+    ref.read(localeProvider.notifier).setLocale(context, newLocale); 
   }
 
   void _toggleTheme() {
-    ref.read(themeProvider.notifier).toggleTheme();
+    // Ensure ThemeProvider is correctly set up and accessible via ref
+    ref.read(themeProvider.notifier).toggleTheme(); 
   }
 
   bool _isDarkMode(ThemeMode themeMode) {
+    // Check current theme mode, considering system preference
     return themeMode == ThemeMode.dark ||
         (themeMode == ThemeMode.system &&
             MediaQuery.platformBrightnessOf(context) == Brightness.dark);
   }
-  // Removed _handleDownload, _showDownloadDialog, _showMessage as download button is removed
 }

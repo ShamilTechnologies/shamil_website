@@ -8,14 +8,14 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:shamil_web/core/constants/app_assets.dart';
 import 'package:shamil_web/core/constants/app_dimensions.dart';
 import 'package:shamil_web/core/constants/app_strings.dart';
-import 'package:shamil_web/core/utils/helpers.dart';
-import 'package:shamil_web/core/widgets/custom_button.dart';
+import 'package:shamil_web/core/utils/helpers.dart'; // Assuming this contains launchUrlHelper
+import 'package:shamil_web/core/widgets/custom_button.dart'; // Ensure CustomButton is up-to-date
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:flutter/foundation.dart';
+// 🐛 FIX: Added foundation import for listEquals
+import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb, listEquals; // Import kIsWeb and listEquals
 
-/// Enhanced Hero Section with viral design elements
-/// Features: Animated gradient backgrounds, floating particles, 
-/// interactive elements, and premium visual effects
+// ✨ Enhanced Hero Section - More Viral & Engaging ✨
+// This section aims to create a captivating first impression with dynamic visuals and smooth interactions.
 class HeroSection extends StatefulWidget {
   const HeroSection({super.key});
 
@@ -23,104 +23,40 @@ class HeroSection extends StatefulWidget {
   State<HeroSection> createState() => _HeroSectionState();
 }
 
-class _HeroSectionState extends State<HeroSection>
-    with TickerProviderStateMixin {
-  
-  // Banner rotation system
+class _HeroSectionState extends State<HeroSection> with TickerProviderStateMixin {
+  // 🖼️ Banner Image System
   final List<String> _bannerImages = [
     AppAssets.heroBanner1,
     AppAssets.heroBanner2,
     AppAssets.heroBanner3,
   ];
-
   int _currentBannerIndex = 0;
   Timer? _bannerTimer;
-  bool _hasImages = true;
+  // 🛡️ Robustness: Tracks if banner images are validly configured
+  bool _hasValidImages = true;
 
-  // Animation controllers for premium effects
-  late AnimationController _particleController;
-  late AnimationController _pulseController;
-  late AnimationController _textAnimationController;
-  
-  // Floating particles data
+  // 🚀 Animation Controllers
+  late AnimationController _particleController; // For background particles
+  late AnimationController _pulseController; // For button pulsing effects
+  late AnimationController _textEntryController; // For staggered text & button entry animations
+
+  // ✨ Floating Particles Configuration
   final List<FloatingParticle> _particles = [];
-  final int _particleCount = 20;
+  // 💡 Performance: Adjust particle count based on platform
+  final int _particleCount = kIsWeb ? 35 : 20;
+  Size _particleCanvasSize = Size.zero; // To store canvas size for particle initialization
+
+  // 🔗 URLs for App Store & Play Store Buttons
+  // TODO: 🎯 Replace with your actual app store URLs!
+  final String _appStoreUrl = 'https://apps.apple.com/app/your-app-id';
+  final String _playStoreUrl = 'https://play.google.com/store/apps/details?id=your.package.name';
 
   @override
   void initState() {
     super.initState();
-    _initializeImageSystem();
+    _validateAndInitializeImageSystem();
     _initializeAnimations();
-    _initializeParticles();
-  }
-
-  /// Initialize banner image rotation system
-  void _initializeImageSystem() {
-    if (_bannerImages.isEmpty || _bannerImages.any((path) => path.isEmpty)) {
-      _hasImages = false;
-      if (kDebugMode) {
-        print("ERROR: HeroSection banner images not properly configured");
-      }
-    } else {
-      _startBannerTimer();
-    }
-  }
-
-  /// Initialize all animation controllers
-  void _initializeAnimations() {
-    // Particle animation controller
-    _particleController = AnimationController(
-      duration: const Duration(seconds: 20),
-      vsync: this,
-    )..repeat();
-
-    // Pulse animation for interactive elements
-    _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    // Text animation controller
-    _textAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    );
-
-    // Start text animations
-    _textAnimationController.forward();
-  }
-
-  /// Initialize floating particles for background effect
-  void _initializeParticles() {
-    final random = math.Random();
-    for (int i = 0; i < _particleCount; i++) {
-      _particles.add(FloatingParticle(
-        x: random.nextDouble(),
-        y: random.nextDouble(),
-        size: random.nextDouble() * 4 + 2,
-        speed: random.nextDouble() * 0.5 + 0.2,
-        opacity: random.nextDouble() * 0.3 + 0.1,
-      ));
-    }
-  }
-
-  void _startBannerTimer() {
-    if (!_hasImages) return;
-
-    _bannerTimer = Timer.periodic(const Duration(seconds: 8), (timer) {
-      if (mounted && _bannerImages.isNotEmpty) {
-        final newIndex = (_currentBannerIndex + 1) % _bannerImages.length;
-        if (kDebugMode) {
-          print("Updating banner: $_currentBannerIndex -> $newIndex");
-        }
-        setState(() {
-          _currentBannerIndex = newIndex;
-        });
-      } else {
-        timer.cancel();
-        setState(() => _hasImages = false);
-      }
-    });
+    // Particles are initialized in `_buildFloatingParticles` via LayoutBuilder once canvas size is known.
   }
 
   @override
@@ -128,99 +64,175 @@ class _HeroSectionState extends State<HeroSection>
     _bannerTimer?.cancel();
     _particleController.dispose();
     _pulseController.dispose();
-    _textAnimationController.dispose();
+    _textEntryController.dispose();
     super.dispose();
   }
 
-  final String _appStoreUrl = 'https://apps.apple.com/app/your-app-id';
-  final String _playStoreUrl = 'https://play.google.com/store/apps/details?id=your.package.name';
+  /// 🛡️ Validates banner image paths and initializes the rotation system.
+  void _validateAndInitializeImageSystem() {
+    _hasValidImages = _bannerImages.isNotEmpty &&
+        _bannerImages.every((path) => path.isNotEmpty && path.startsWith('assets/'));
+
+    if (!_hasValidImages) {
+      if (kDebugMode) {
+        print(
+            "🖼️ ERROR: HeroSection banner images are missing or incorrectly configured in AppAssets.dart. Falling back to gradient background.");
+      }
+    } else {
+      _startBannerTimer();
+    }
+  }
+
+  /// ⚙️ Initializes all animation controllers.
+  void _initializeAnimations() {
+    _particleController = AnimationController(
+      duration: const Duration(seconds: 25),
+      vsync: this,
+    )..repeat();
+
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 2200),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _textEntryController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        _textEntryController.forward();
+      }
+    });
+  }
+
+  /// ✨ Initializes floating particles once the canvas size is available.
+  void _initializeParticles(Size size) {
+    if (_particles.isNotEmpty || size.isEmpty || !mounted) return;
+
+    final random = math.Random();
+    for (int i = 0; i < _particleCount; i++) {
+      _particles.add(FloatingParticle(
+        x: random.nextDouble() * size.width,
+        y: random.nextDouble() * size.height,
+        size: random.nextDouble() * 2.5 + 1.5,
+        speed: random.nextDouble() * 0.3 + 0.1,
+        initialOpacity: random.nextDouble() * 0.25 + 0.05,
+        color: Colors.white.withOpacity(random.nextDouble() * 0.4 + 0.15),
+      ));
+    }
+  }
+
+  /// ⏱️ Starts or restarts the banner image rotation timer.
+  void _startBannerTimer() {
+    if (!_hasValidImages) return;
+
+    _bannerTimer?.cancel();
+    _bannerTimer = Timer.periodic(const Duration(seconds: 7), (timer) {
+      if (mounted && _bannerImages.isNotEmpty) {
+        setState(() {
+          _currentBannerIndex = (_currentBannerIndex + 1) % _bannerImages.length;
+        });
+      } else {
+        timer.cancel();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isMobile = ResponsiveBreakpoints.of(context).smallerOrEqualTo(MOBILE);
     final double screenHeight = MediaQuery.of(context).size.height;
-    final double heroHeight = screenHeight * 0.95;
+    final double heroHeight = isMobile ? screenHeight * 0.88 : screenHeight * 0.92;
 
     return SizedBox(
       width: double.infinity,
       height: heroHeight,
       child: Stack(
         children: [
-          // Enhanced animated background
           _buildAnimatedBackground(theme),
-          
-          // Floating particles overlay
           _buildFloatingParticles(),
-          
-          // Main content with enhanced animations
-          _buildMainContent(theme, isMobile, heroHeight),
-          
-          // Scroll indicator at bottom
-          _buildScrollIndicator(theme),
+          _buildMainContent(theme, isMobile),
+          _buildScrollIndicator(theme, isMobile),
         ],
       ),
     );
   }
 
-  /// Build animated background with multiple layers
+  /// 🎨 Builds the animated background (image slideshow or fallback gradient).
   Widget _buildAnimatedBackground(ThemeData theme) {
     final Color overlayColor = theme.brightness == Brightness.light
-        ? Colors.black.withOpacity(0.4)
-        : Colors.black.withOpacity(0.6);
+        ? Colors.black.withOpacity(0.30)
+        : Colors.black.withOpacity(0.50);
 
-    Widget backgroundWidget = !_hasImages
-        ? Container(
-            key: const ValueKey<String>('fallback_background'),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  theme.colorScheme.primary,
-                  theme.colorScheme.primary.withOpacity(0.8),
-                  theme.colorScheme.secondary.withOpacity(0.6),
-                ],
+    Widget backgroundContent;
+
+    if (_hasValidImages) {
+      backgroundContent = AnimatedSwitcher(
+        duration: const Duration(milliseconds: 1800),
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return FadeTransition(
+            opacity: animation,
+            child: ScaleTransition(
+              scale: Tween<double>(begin: 1.03, end: 1.0).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
               ),
-            ),
-          )
-        : Container(
-            key: ValueKey<int>(_currentBannerIndex),
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(_bannerImages[_currentBannerIndex]),
-                fit: BoxFit.cover,
-                colorFilter: ColorFilter.mode(overlayColor, BlendMode.darken),
-                onError: (exception, stackTrace) {
-                  if (kDebugMode) {
-                    print("ERROR loading banner: ${_bannerImages[_currentBannerIndex]}");
-                  }
-                },
-              ),
+              child: child,
             ),
           );
+        },
+        child: Container(
+          key: ValueKey<int>(_currentBannerIndex),
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(_bannerImages[_currentBannerIndex]),
+              fit: BoxFit.cover,
+              colorFilter: ColorFilter.mode(overlayColor, BlendMode.darken),
+              onError: (exception, stackTrace) {
+                if (kDebugMode) {
+                  print("🖼️ ERROR loading banner: ${_bannerImages[_currentBannerIndex]} - $exception");
+                }
+                if (mounted) {
+                  // Check if it's already false to avoid unnecessary setState calls in a loop
+                  if (_hasValidImages) {
+                    setState(() => _hasValidImages = false);
+                  }
+                }
+              },
+            ),
+          ),
+        ),
+      );
+    } else {
+      // Fallback gradient
+      backgroundContent = Container(
+        key: const ValueKey<String>('fallback_gradient_background'),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: theme.brightness == Brightness.light
+                ? [
+                    theme.colorScheme.primary.withOpacity(0.8),
+                    theme.colorScheme.primary.withOpacity(0.6),
+                    theme.colorScheme.secondary.withOpacity(0.4)
+                  ]
+                : [
+                    const Color(0xFF0A121F),
+                    const Color(0xFF101C2C),
+                    theme.colorScheme.primary.withOpacity(0.25)
+                  ],
+          ),
+        ),
+      );
+    }
 
     return Positioned.fill(
       child: Stack(
         children: [
-          // Main background
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 2000),
-            transitionBuilder: (Widget child, Animation<double> animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: ScaleTransition(
-                  scale: Tween<double>(begin: 1.1, end: 1.0).animate(
-                    CurvedAnimation(parent: animation, curve: Curves.easeOut),
-                  ),
-                  child: child,
-                ),
-              );
-            },
-            child: backgroundWidget,
-          ),
-          
-          // Gradient overlay for better text readability
+          backgroundContent,
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -228,10 +240,10 @@ class _HeroSectionState extends State<HeroSection>
                 end: Alignment.bottomCenter,
                 colors: [
                   Colors.transparent,
-                  Colors.black.withOpacity(0.1),
-                  Colors.black.withOpacity(0.3),
+                  Colors.black.withOpacity(0.03),
+                  Colors.black.withOpacity(0.20),
                 ],
-                stops: const [0.0, 0.7, 1.0],
+                stops: const [0.0, 0.65, 1.0],
               ),
             ),
           ),
@@ -240,49 +252,69 @@ class _HeroSectionState extends State<HeroSection>
     );
   }
 
-  /// Build floating particles animation
+  /// ✨ Builds the floating particles overlay.
   Widget _buildFloatingParticles() {
-    return Positioned.fill(
-      child: AnimatedBuilder(
+    return LayoutBuilder(builder: (context, constraints) {
+      if (_particles.isEmpty && constraints.maxWidth > 0 && constraints.maxHeight > 0) {
+        _particleCanvasSize = constraints.biggest;
+        // Call _initializeParticles only if the size is determined and particles are not yet initialized.
+        // This prevents multiple calls if LayoutBuilder rebuilds for other reasons.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+           if(mounted && _particles.isEmpty && _particleCanvasSize.width > 0 && _particleCanvasSize.height > 0) {
+            _initializeParticles(_particleCanvasSize);
+            // Potentially call setState if _initializeParticles itself doesn't trigger a repaint of AnimatedBuilder consumers
+            // However, AnimatedBuilder should pick up changes if _particles list instance changes or controller ticks.
+            // For safety, if _initializeParticles populates a list that is final and passed, a setState might be needed here.
+            // But since _particles is a state variable and _particleController ticks, it should be fine.
+           }
+        });
+      }
+      if (_particles.isEmpty || _particleCanvasSize.isEmpty) return const SizedBox.shrink();
+
+      return AnimatedBuilder(
         animation: _particleController,
         builder: (context, child) {
           return CustomPaint(
+            size: _particleCanvasSize,
             painter: ParticlesPainter(
               particles: _particles,
               animationValue: _particleController.value,
+              canvasSize: _particleCanvasSize,
             ),
           );
         },
-      ),
-    );
+      );
+    });
   }
 
-  /// Build main content with enhanced animations
-  Widget _buildMainContent(ThemeData theme, bool isMobile, double heroHeight) {
+  /// 📝 Builds the main content (title, subtitle, buttons) with entry animations.
+  Widget _buildMainContent(ThemeData theme, bool isMobile) {
     return Center(
       child: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: AppDimensions.paddingPageHorizontal,
-          vertical: isMobile ? 40 : 60,
+          vertical: isMobile ? AppDimensions.paddingLarge : AppDimensions.paddingExtraLarge,
         ),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 900),
+          constraints: const BoxConstraints(maxWidth: 800),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Enhanced title with gradient text
-              _buildEnhancedTitle(theme, isMobile),
-              
-              SizedBox(height: isMobile ? 16 : 24),
-              
-              // Enhanced subtitle
-              _buildEnhancedSubtitle(theme, isMobile),
-              
-              SizedBox(height: isMobile ? 32 : 48),
-              
-              // Enhanced action buttons
-              _buildEnhancedActionButtons(theme, isMobile),
+              _buildEnhancedTitle(theme, isMobile)
+                  .animate(controller: _textEntryController)
+                  .fadeIn(duration: 600.ms, curve: Curves.easeOutCubic)
+                  .slideY(begin: 0.3, curve: Curves.easeOutCubic),
+              SizedBox(height: isMobile ? AppDimensions.spacingSmall : AppDimensions.spacingMedium),
+              _buildEnhancedSubtitle(theme, isMobile)
+                  .animate(controller: _textEntryController)
+                  .fadeIn(delay: 150.ms, duration: 600.ms)
+                  .slideY(begin: 0.3, delay: 150.ms, curve: Curves.easeOutCubic),
+              SizedBox(height: isMobile ? AppDimensions.spacingMedium * 1.5 : AppDimensions.spacingLarge * 1.5),
+              _buildEnhancedActionButtons(theme, isMobile)
+                  .animate(controller: _textEntryController)
+                  .fadeIn(delay: 300.ms, duration: 600.ms)
+                  .slideY(begin: 0.3, delay: 300.ms, curve: Curves.easeOutCubic),
             ],
           ),
         ),
@@ -290,261 +322,243 @@ class _HeroSectionState extends State<HeroSection>
     );
   }
 
-  /// Build enhanced title with gradient and animation effects
+  /// ✨ Builds the enhanced title with gradient text and refined styling.
   Widget _buildEnhancedTitle(ThemeData theme, bool isMobile) {
-    return AnimatedBuilder(
-      animation: _textAnimationController,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(0, 30 * (1 - _textAnimationController.value)),
-          child: Opacity(
-            opacity: _textAnimationController.value,
-            child: ShaderMask(
-              shaderCallback: (bounds) => LinearGradient(
-                colors: [
-                  Colors.white,
-                  Colors.white.withOpacity(0.8),
-                  Colors.white,
-                ],
-                stops: const [0.0, 0.5, 1.0],
-              ).createShader(bounds),
-              child: Text(
-                AppStrings.heroTitle.tr(),
-                style: Helpers.responsiveValue(
-                  context,
-                  mobile: theme.textTheme.displaySmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.5,
-                    height: 1.1,
-                  ),
-                  desktop: theme.textTheme.displayMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.5,
-                    height: 1.1,
-                  ),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
+    return Text(
+      AppStrings.heroTitle.tr(),
+      style: Helpers.responsiveValue(
+        context,
+        mobile: theme.textTheme.displaySmall?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.8,
+          height: 1.15,
+          shadows: [
+            Shadow(blurRadius: 8.0, color: Colors.black.withOpacity(0.3), offset: const Offset(2, 2)),
+          ],
+        ),
+        desktop: theme.textTheme.displayMedium?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -1.0,
+          height: 1.15,
+          shadows: [
+            Shadow(blurRadius: 10.0, color: Colors.black.withOpacity(0.3), offset: const Offset(2, 3)),
+          ],
+        ),
+      ),
+      textAlign: TextAlign.center,
+    )
+        .animate()
+        .then(delay: 800.ms) // Delay shimmer
+        .shimmer(
+          duration: 2500.ms,
+          colors: [Colors.white, Colors.grey.shade400, Colors.white.withOpacity(0.7), Colors.grey.shade400, Colors.white],
+          stops: const [0.2, 0.4, 0.5, 0.6, 0.8], // Finer control over shimmer gradient
+          angle: 30 * (math.pi / 180),
+          blendMode: BlendMode.srcIn, // srcIn usually looks better for text shimmer
         );
-      },
-    ).animate(delay: 300.ms).shimmer(duration: 2000.ms, color: Colors.white54);
   }
 
-  /// Build enhanced subtitle with typing effect
+  /// ✨ Builds the enhanced subtitle with a soft backdrop for readability.
   Widget _buildEnhancedSubtitle(ThemeData theme, bool isMobile) {
-    return AnimatedBuilder(
-      animation: _textAnimationController,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(0, 20 * (1 - _textAnimationController.value)),
-          child: Opacity(
-            opacity: _textAnimationController.value,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.2),
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                AppStrings.heroSubtitle.tr(),
-                style: Helpers.responsiveValue(
-                  context,
-                  mobile: theme.textTheme.titleLarge?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
-                    height: 1.4,
-                  ),
-                  desktop: theme.textTheme.headlineSmall?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
-                    height: 1.4,
-                  ),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
+    return Container(
+      padding: EdgeInsets.symmetric(
+          horizontal: isMobile ? AppDimensions.paddingSmall : AppDimensions.paddingMedium,
+          vertical: isMobile ? AppDimensions.paddingExtraSmall * 1.5 : AppDimensions.paddingSmall,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.35), // Slightly more pronounced backdrop
+        borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge * 1.2),
+        border: Border.all(color: Colors.white.withOpacity(0.15), width: 0.5), // Thinner, more subtle border
+      ),
+      child: Text(
+        AppStrings.heroSubtitle.tr(),
+        style: Helpers.responsiveValue(
+          context,
+          mobile: theme.textTheme.titleMedium?.copyWith(
+            color: Colors.white.withOpacity(0.95), // Brighter text for better contrast
+            height: 1.5, // Increased line height for readability
+            fontWeight: FontWeight.w400,
           ),
-        );
-      },
-    ).animate(delay: 600.ms).fadeIn(duration: 800.ms);
+          desktop: theme.textTheme.headlineSmall?.copyWith(
+            color: Colors.white.withOpacity(0.95),
+            height: 1.5,
+            fontWeight: FontWeight.w400,
+            fontSize: 20,
+          ),
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
   }
 
-  /// Build enhanced action buttons with hover effects
+  /// ✨ Builds enhanced action buttons using the updated `CustomButton`.
   Widget _buildEnhancedActionButtons(ThemeData theme, bool isMobile) {
     return AnimatedBuilder(
       animation: _pulseController,
       builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(0, 30 * (1 - _textAnimationController.value)),
-          child: Opacity(
-            opacity: _textAnimationController.value,
-            child: ResponsiveRowColumn(
-              layout: isMobile ? ResponsiveRowColumnType.COLUMN : ResponsiveRowColumnType.ROW,
-              rowMainAxisAlignment: MainAxisAlignment.center,
-              columnCrossAxisAlignment: CrossAxisAlignment.center,
-              rowSpacing: AppDimensions.spacingLarge,
-              columnSpacing: AppDimensions.spacingLarge,
-              children: [
-                // Primary App Store Button with glow effect
-                ResponsiveRowColumnItem(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.colorScheme.primary.withOpacity(0.4),
-                          blurRadius: 20 + (_pulseController.value * 10),
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                    child: CustomButton(
-                      text: "App Store",
-                      onPressed: () => Helpers.launchUrlHelper(context, _appStoreUrl),
-                      icon: const Icon(Icons.apple),
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: Colors.white,
-                    ),
+        final double pulseEffect = _pulseController.value * 0.015;
+
+        return ResponsiveRowColumn(
+          layout: isMobile ? ResponsiveRowColumnType.COLUMN : ResponsiveRowColumnType.ROW,
+          rowMainAxisAlignment: MainAxisAlignment.center,
+          columnCrossAxisAlignment: CrossAxisAlignment.center,
+          rowSpacing: AppDimensions.spacingMedium,
+          columnSpacing: AppDimensions.spacingSmall * 1.5,
+          children: [
+            ResponsiveRowColumnItem(
+              child: Transform.scale(
+                scale: 1.0 + pulseEffect,
+                child: CustomButton(
+                  text: "App Store", // TODO: Localize
+                  onPressed: () => Helpers.launchUrlHelper(context, _appStoreUrl),
+                  icon: const Icon(Icons.apple, size: 20),
+                  gradient: LinearGradient(
+                    colors: [theme.colorScheme.primary, Color.lerp(theme.colorScheme.primary, theme.colorScheme.secondary, 0.6)!],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
+                  foregroundColor: Colors.white,
+                  hoverScale: 1.07,
+                  shimmerEffect: true,
+                  animationDuration: const Duration(milliseconds: 150),
                 ),
-                
-                // Secondary Google Play Button with different glow
-                ResponsiveRowColumnItem(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.colorScheme.secondary.withOpacity(0.3),
-                          blurRadius: 15 + (_pulseController.value * 8),
-                          spreadRadius: 1,
-                        ),
-                      ],
-                    ),
-                    child: CustomButton(
-                      text: "Google Play",
-                      onPressed: () => Helpers.launchUrlHelper(context, _playStoreUrl),
-                      icon: const Icon(Icons.shop),
-                      isSecondary: true,
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.white,
-                      side: BorderSide(color: Colors.white.withOpacity(0.8), width: 2),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+            ResponsiveRowColumnItem(
+              child: Transform.scale(
+                scale: 1.0 + pulseEffect,
+                child: CustomButton(
+                  text: "Google Play", // TODO: Localize
+                  onPressed: () => Helpers.launchUrlHelper(context, _playStoreUrl),
+                  icon: const Icon(Icons.shop_outlined, size: 18),
+                  isSecondary: true,
+                  backgroundColor: Colors.black.withOpacity(0.2),
+                  foregroundColor: Colors.white,
+                  side: BorderSide(color: Colors.white.withOpacity(0.6), width: 1.2),
+                  hoverScale: 1.07,
+                  shimmerEffect: false,
+                  animationDuration: const Duration(milliseconds: 150),
+                ),
+              ),
+            ),
+          ],
         );
       },
-    ).animate(delay: 900.ms).slideY(begin: 0.3, duration: 800.ms, curve: Curves.easeOutCubic);
+    );
   }
 
-  /// Build scroll indicator at bottom
-  Widget _buildScrollIndicator(ThemeData theme) {
+  /// 👇 Builds the scroll-down indicator with a subtle animation.
+  Widget _buildScrollIndicator(ThemeData theme, bool isMobile) {
     return Positioned(
-      bottom: 30,
+      bottom: isMobile ? AppDimensions.paddingMedium : AppDimensions.paddingLarge,
       left: 0,
       right: 0,
       child: Center(
-        child: AnimatedBuilder(
-          animation: _pulseController,
-          builder: (context, child) {
-            return Opacity(
-              opacity: 0.6 + (_pulseController.value * 0.4),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "Scroll to explore",
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.white.withOpacity(0.8),
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.white.withOpacity(0.3)),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Icon(
-                      Icons.keyboard_arrow_down,
-                      color: Colors.white.withOpacity(0.8),
-                      size: 20,
-                    ),
-                  ),
-                ],
+        child: IgnorePointer(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Scroll to Discover More", // TODO: Localize
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Colors.white.withOpacity(0.65),
+                  letterSpacing: 0.7,
+                ),
               ),
-            );
-          },
-        ).animate(delay: 1500.ms).fadeIn(duration: 1000.ms)
-         .then(delay: 500.ms)
-         .moveY(begin: 0, end: 10, duration: 2000.ms, curve: Curves.easeInOut)
-         .then()
-         .moveY(begin: 10, end: 0, duration: 2000.ms, curve: Curves.easeInOut),
+              const SizedBox(height: AppDimensions.spacingSmall * 0.75),
+              Container(
+                padding: const EdgeInsets.all(AppDimensions.paddingExtraSmall),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.white.withOpacity(0.2)),
+                  borderRadius: BorderRadius.circular(AppDimensions.borderRadiusCircle),
+                ),
+                child: Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: Colors.white.withOpacity(0.65),
+                  size: 16,
+                ),
+              ),
+            ],
+          )
+          .animate(delay: 1800.ms)
+          .fadeIn(duration: 1000.ms, curve: Curves.easeOut)
+          .then(delay: 200.ms)
+          .animate(onPlay: (controller) => controller.repeat(reverse: true))
+          .slideY(begin: 0, end: 6, duration: 2000.ms, curve: Curves.easeInOutSine),
+        ),
       ),
     );
   }
 }
 
-/// Floating particle data class
+/// 🧊 Floating Particle Data Class
 class FloatingParticle {
   double x;
   double y;
   final double size;
   final double speed;
-  final double opacity;
+  final double initialOpacity;
+  final Color color;
 
   FloatingParticle({
     required this.x,
     required this.y,
     required this.size,
     required this.speed,
-    required this.opacity,
+    required this.initialOpacity,
+    required this.color,
   });
 }
 
-/// Custom painter for floating particles
+/// ✨ Custom Painter for Floating Particles - Refined for Performance and Aesthetics
 class ParticlesPainter extends CustomPainter {
   final List<FloatingParticle> particles;
   final double animationValue;
+  final Size canvasSize;
 
   ParticlesPainter({
     required this.particles,
     required this.animationValue,
+    required this.canvasSize,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (particles.isEmpty || canvasSize.isEmpty) return;
+
     final paint = Paint()..style = PaintingStyle.fill;
+    final random = math.Random();
 
     for (final particle in particles) {
-      // Update particle position
-      particle.y -= particle.speed * 0.01;
-      if (particle.y < -0.1) {
-        particle.y = 1.1;
-        particle.x = math.Random().nextDouble();
+      particle.y -= particle.speed * 0.7;
+      particle.x += math.sin(particle.y / 70 + particle.size * 5) * particle.speed * 0.15;
+
+      if (particle.y < -particle.size) {
+        particle.y = canvasSize.height + particle.size;
+        particle.x = random.nextDouble() * canvasSize.width;
       }
+      if (particle.x < -particle.size) particle.x = canvasSize.width + particle.size;
+      if (particle.x > canvasSize.width + particle.size) particle.x = -particle.size;
 
-      // Add horizontal drift
-      particle.x += math.sin(animationValue * 2 * math.pi + particle.y * 10) * 0.001;
+      double fadeEffectOpacity = 1.0;
+      double fadeInThreshold = canvasSize.height * 0.10;
+      double fadeOutThreshold = canvasSize.height * 0.10;
 
-      // Keep particles within bounds
-      if (particle.x < 0) particle.x = 1.0;
-      if (particle.x > 1) particle.x = 0.0;
+      if (particle.y > canvasSize.height - fadeInThreshold) {
+        fadeEffectOpacity = (canvasSize.height - particle.y) / fadeInThreshold;
+      } else if (particle.y < fadeOutThreshold) {
+        fadeEffectOpacity = particle.y / fadeOutThreshold;
+      }
+      
+      final double globalPulse = 0.7 + (math.sin(animationValue * 2 * math.pi + particle.size) + 1) / 2 * 0.3;
+      final double combinedOpacity = (particle.initialOpacity * fadeEffectOpacity * globalPulse).clamp(0.0, 1.0);
 
-      // Draw particle
-      paint.color = Colors.white.withOpacity(particle.opacity);
+      paint.color = particle.color.withOpacity(combinedOpacity);
+      
       canvas.drawCircle(
-        Offset(particle.x * size.width, particle.y * size.height),
+        Offset(particle.x, particle.y),
         particle.size,
         paint,
       );
@@ -552,5 +566,10 @@ class ParticlesPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant ParticlesPainter oldDelegate) {
+    // 🐛 FIX: Corrected listEquals import and usage
+    return oldDelegate.animationValue != animationValue ||
+           !listEquals(oldDelegate.particles, particles) || 
+           oldDelegate.canvasSize != canvasSize;
+  }
 }

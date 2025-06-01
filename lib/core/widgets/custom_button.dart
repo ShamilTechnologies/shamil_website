@@ -1,8 +1,9 @@
+// lib/core/widgets/custom_button.dart
 import 'package:flutter/material.dart';
 import 'package:shamil_web/core/constants/app_dimensions.dart';
 import 'package:shamil_web/core/constants/app_colors.dart'; // Import AppColors for white
 
-// Convert to StatefulWidget for hover animation state
+// ✨ Enhanced Custom Button with Viral Potential ✨
 class CustomButton extends StatefulWidget {
   final String text;
   final VoidCallback onPressed;
@@ -15,6 +16,8 @@ class CustomButton extends StatefulWidget {
   final WidgetStateProperty<Color?>? overlayColor; // Prop to override hover/splash
   final Duration animationDuration; // Duration for hover animation
   final double hoverScale; // Scale factor on hover
+  final Gradient? gradient; // 🆕 Gradient background option!
+  final bool shimmerEffect; // 🆕 Option for a subtle shimmer on hover!
 
   const CustomButton({
     super.key,
@@ -27,95 +30,163 @@ class CustomButton extends StatefulWidget {
     this.side,
     this.elevation,
     this.overlayColor,
-    this.animationDuration = const Duration(milliseconds: 200), // Default duration
-    this.hoverScale = 1.05, // Default scale increase
+    this.animationDuration = const Duration(milliseconds: 200),
+    this.hoverScale = 1.05,
+    this.gradient, // ✨ New property for gradient background
+    this.shimmerEffect = false, // ✨ New property for shimmer effect
   });
 
   @override
   State<CustomButton> createState() => _CustomButtonState();
 }
 
-class _CustomButtonState extends State<CustomButton> {
+class _CustomButtonState extends State<CustomButton> with SingleTickerProviderStateMixin { // Added TickerProviderStateMixin for shimmer
   bool _isHovered = false;
+  late AnimationController _shimmerController; // ✨ Controller for shimmer effect
+
+  @override
+  void initState() {
+    super.initState();
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500), // Shimmer animation duration
+    );
+    if (widget.shimmerEffect) {
+      _shimmerController.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _shimmerController.dispose(); // Dispose shimmer controller
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    // Get the base style from the global ElevatedButtonTheme defined in AppTheme.dart
     final ButtonStyle? baseThemeStyle = theme.elevatedButtonTheme.style;
-
     ButtonStyle specificStyle;
 
+    // 🎨 Determine button style (Primary or Secondary)
     if (widget.isSecondary) {
-      // --- Define Outline Button Style ---
+      // --- Outline Button Style ---
       specificStyle = ElevatedButton.styleFrom(
-        // Default background is transparent for outline style
         backgroundColor: widget.backgroundColor ?? Colors.transparent,
-        // *** CHANGED: Default foreground is white for secondary button ***
-        foregroundColor: widget.foregroundColor ?? AppColors.textWhite,
-        // Default border uses theme's primary color (or override)
+        foregroundColor: widget.foregroundColor ?? AppColors.textWhite, // Default secondary foreground is white
         side: widget.side ?? BorderSide(color: theme.colorScheme.primary, width: 1.5),
-        // Default elevation is 0 for flat outline look
         elevation: widget.elevation ?? 0.0,
-        // DO NOT set overlayColor directly in styleFrom if using the prop
       ).merge(baseThemeStyle?.copyWith(
-          // Ensure elevation and background are definitely overridden
           elevation: WidgetStateProperty.all(widget.elevation ?? 0.0),
           backgroundColor: WidgetStateProperty.all(widget.backgroundColor ?? Colors.transparent),
-          // Apply the overlayColor prop if provided, otherwise use default outline overlay (now using white with opacity)
           overlayColor: widget.overlayColor ?? WidgetStateProperty.all(AppColors.white.withOpacity(0.15)),
-          // Apply side prop if provided
           side: widget.side != null ? WidgetStateProperty.all(widget.side) : null,
-          // Apply foreground override if provided
           foregroundColor: widget.foregroundColor != null ? WidgetStateProperty.all(widget.foregroundColor) : WidgetStateProperty.all(AppColors.textWhite),
       ));
-
     } else {
-      // --- Define Primary Button Style ---
-      // Construct ButtonStyle directly to handle MaterialStateProperty overrides correctly.
+      // --- Primary Button Style ---
       specificStyle = baseThemeStyle ?? const ButtonStyle();
-
-      // Apply overrides if props are provided, wrapping simple values with MaterialStateProperty.all()
       specificStyle = specificStyle.copyWith(
-        backgroundColor: widget.backgroundColor != null ? WidgetStateProperty.all(widget.backgroundColor) : null,
+        backgroundColor: widget.gradient == null && widget.backgroundColor != null
+            ? WidgetStateProperty.all(widget.backgroundColor)
+            : (widget.gradient == null ? null : WidgetStateProperty.all(Colors.transparent)), // Transparent if gradient
         foregroundColor: widget.foregroundColor != null ? WidgetStateProperty.all(widget.foregroundColor) : null,
         side: widget.side != null ? WidgetStateProperty.all(widget.side) : null,
-        elevation: widget.elevation != null ? WidgetStateProperty.all(widget.elevation) : null,
-        overlayColor: widget.overlayColor, // Directly use the overlayColor prop
+        elevation: widget.gradient != null ? WidgetStateProperty.all(0.0) : (widget.elevation != null ? WidgetStateProperty.all(widget.elevation) : null), // No elevation if gradient by default
+        overlayColor: widget.overlayColor,
       );
     }
 
-    // Determine the final foreground color for the icon, considering overrides and theme.
+    // Determine the final foreground color for the icon
     Color? currentForegroundColor = specificStyle.foregroundColor?.resolve({});
     currentForegroundColor ??= widget.isSecondary
-          ? AppColors.textWhite // Default secondary foreground is white
+          ? AppColors.textWhite
           : theme.colorScheme.onPrimary;
 
+    // ✨ Button content with optional shimmer
+    Widget buttonContent = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (widget.icon != null) ...[
+          IconTheme(
+            data: IconThemeData(color: currentForegroundColor),
+            child: widget.icon!,
+          ),
+          const SizedBox(width: AppDimensions.spacingSmall),
+        ],
+        Text(widget.text),
+      ],
+    );
+
+    // Apply shimmer effect if enabled and hovered
+    if (widget.shimmerEffect && _isHovered) {
+      buttonContent = AnimatedBuilder(
+        animation: _shimmerController,
+        builder: (context, child) {
+          return ShaderMask(
+            blendMode: BlendMode.srcIn, // Blend shimmer with text/icon color
+            shaderCallback: (bounds) {
+              final shimmerValue = _shimmerController.value;
+              return LinearGradient(
+                colors: [
+                  currentForegroundColor!,
+                  Colors.white.withOpacity(0.8), // Shimmer color
+                  currentForegroundColor,
+                ],
+                stops: [
+                  shimmerValue - 0.5, // Control shimmer width and speed
+                  shimmerValue,
+                  shimmerValue + 0.5,
+                ],
+                begin: const Alignment(-1.5, -0.5), // Angle shimmer from top-left
+                end: const Alignment(1.5, 0.5),
+                tileMode: TileMode.clamp,
+              ).createShader(bounds);
+            },
+            child: child,
+          );
+        },
+        child: buttonContent,
+      );
+    }
+    
+    // 🏗️ Build the button structure
+    Widget button = ElevatedButton(
+      style: specificStyle,
+      onPressed: widget.onPressed,
+      child: buttonContent,
+    );
+
+    // Wrap with gradient if provided
+    if (widget.gradient != null && !widget.isSecondary) {
+      button = Ink( // Use Ink for correct splash effect on gradient
+        decoration: BoxDecoration(
+          gradient: widget.gradient,
+          borderRadius: specificStyle.shape?.resolve({}) is RoundedRectangleBorder
+              ? ((specificStyle.shape!.resolve({}) as RoundedRectangleBorder).borderRadius as BorderRadius?)
+              : BorderRadius.circular(AppDimensions.borderRadiusMedium), // Fallback
+        ),
+        child: ElevatedButton(
+          style: specificStyle.copyWith(
+            backgroundColor: WidgetStateProperty.all(Colors.transparent),
+            elevation: WidgetStateProperty.all(0), // Ensure no default elevation with gradient
+          ),
+          onPressed: widget.onPressed,
+          child: buttonContent,
+        ),
+      );
+    }
+
+    // 🖱️ Mouse region for hover effects
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      cursor: SystemMouseCursors.click, // Show click cursor on hover
+      cursor: SystemMouseCursors.click,
       child: AnimatedScale(
-        scale: _isHovered ? widget.hoverScale : 1.0, // Apply scale based on hover state
-        duration: widget.animationDuration, // Use animation duration prop
-        curve: Curves.easeInOut, // Smooth animation curve
-        child: ElevatedButton(
-          style: specificStyle, // Use the calculated specific style
-          onPressed: widget.onPressed,
-          child: Row(
-            mainAxisSize: MainAxisSize.min, // Don't take full width unless needed
-            children: [
-              if (widget.icon != null) ...[
-                IconTheme( // Apply the determined foreground color to the icon
-                  data: IconThemeData(color: currentForegroundColor),
-                  child: widget.icon!,
-                ),
-                const SizedBox(width: AppDimensions.spacingSmall),
-              ],
-              Text(widget.text), // Text widget will inherit its color from ButtonStyle.foregroundColor
-            ],
-          ),
-        ),
+        scale: _isHovered ? widget.hoverScale : 1.0,
+        duration: widget.animationDuration,
+        curve: Curves.easeInOut,
+        child: button,
       ),
     );
   }

@@ -1,154 +1,156 @@
-// lib/features/provider/presentation/screens/provider_services_screen.dart
+  import 'package:flutter/material.dart';
+  import 'package:flutter_animate/flutter_animate.dart';
+  import 'package:shamil_web/core/widgets/modern_app_bar.dart';
+  import 'package:shamil_web/core/widgets/scroll_to_top_fab.dart';
+  import 'package:shamil_web/features/home/presentation/widgets/footer_section.dart';
 
-import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart'; // For page entry animations
-import 'package:shamil_web/core/widgets/modern_app_bar.dart';
-import 'package:shamil_web/core/widgets/scroll_to_top_fab.dart';
-import 'package:shamil_web/features/home/presentation/widgets/footer_section.dart';
-import 'package:shamil_web/features/home/presentation/widgets/provider_screen/provider_hero_section.dart';
+  // Ensure these paths are correct and the widgets are defined
+  import 'package:shamil_web/features/providers/widgets/provider_cta_section.dart';
+  import 'package:shamil_web/features/providers/widgets/provider_hero_section.dart';
+  import 'package:shamil_web/features/providers/widgets/provider_how_it_works_section.dart';
+  import 'package:shamil_web/features/providers/widgets/provider_pricing_section.dart';
 
-// Corrected and standardized import paths for provider section widgets
-// Make sure these files exist at these paths and define the respective classes
-import 'package:shamil_web/features/providers/widgets/provider_cta_section.dart';
-import 'package:shamil_web/features/providers/widgets/provider_how_it_works_section.dart';
-import 'package:shamil_web/features/providers/widgets/provider_pricing_section.dart'; 
+  class ProviderServicesScreen extends StatefulWidget {
+    const ProviderServicesScreen({super.key});
 
-class ProviderServicesScreen extends StatefulWidget {
-  const ProviderServicesScreen({super.key});
+    @override
+    State<ProviderServicesScreen> createState() => _ProviderServicesScreenState();
+  }
 
-  @override
-  State<ProviderServicesScreen> createState() => _ProviderServicesScreenState();
-}
+  class _ProviderServicesScreenState extends State<ProviderServicesScreen>
+      with TickerProviderStateMixin {
+    late ScrollController _scrollController;
+    late AnimationController _floatingParticlesController;
+    late AnimationController _pageEntryController;
 
-class _ProviderServicesScreenState extends State<ProviderServicesScreen>
-    with TickerProviderStateMixin {
-  late ScrollController _scrollController;
-  late AnimationController _floatingParticlesController; // For sections that use it
-  late AnimationController _pageEntryController; // For overall page entry
+    bool _isLoading = true;
 
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
+    @override
+    void initState() {
+      super.initState();
+      print("[ProviderServicesScreen - SECTION TEST] initState: Called");
 
-    _floatingParticlesController = AnimationController(
-      duration: const Duration(seconds: 25), // Consistent duration for particle animations
-      vsync: this,
-    )..repeat();
+      _scrollController = ScrollController();
+      _floatingParticlesController = AnimationController(
+        duration: const Duration(seconds: 25),
+        vsync: this,
+      )..repeat();
+      _pageEntryController = AnimationController(
+        duration: const Duration(milliseconds: 500),
+        vsync: this,
+      );
 
-    _pageEntryController = AnimationController(
-      duration: const Duration(milliseconds: 500), // Slightly faster page entry animation
-      vsync: this,
-    );
+      // Using a shorter delay now that we know the basic screen works.
+      // This just ensures the loading indicator is briefly visible.
+      Future.delayed(const Duration(milliseconds: 500), () {
+        print("[ProviderServicesScreen - SECTION TEST] initState: Loading complete. Setting _isLoading to false.");
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              print("[ProviderServicesScreen - SECTION TEST] initState: Triggering page entry animation.");
+              _pageEntryController.forward();
+            }
+          });
+        }
+      });
+    }
 
-    // Start page entry animation shortly after the first frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _pageEntryController.forward();
+    @override
+    void dispose() {
+      print("[ProviderServicesScreen - SECTION TEST] dispose: Called");
+      _scrollController.dispose();
+      _floatingParticlesController.dispose();
+      _pageEntryController.dispose();
+      super.dispose();
+    }
+
+    @override
+    Widget build(BuildContext context) {
+      print("[ProviderServicesScreen - SECTION TEST] build: Called. _isLoading = $_isLoading");
+
+      if (_isLoading) {
+        print("[ProviderServicesScreen - SECTION TEST] build: Showing loading indicator.");
+        return Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.surface.withOpacity(0.9),
+          appBar: AppBar(
+            title: const Text("Loading Provider Sections..."),
+            automaticallyImplyLeading: false, // Assuming ModernAppBar handles this
+          ),
+          body: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
       }
-    });
-  }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    _floatingParticlesController.dispose();
-    _pageEntryController.dispose();
-    super.dispose();
-  }
+      print("[ProviderServicesScreen - SECTION TEST] build: Attempting to build main content with sections.");
 
-  @override
-  Widget build(BuildContext context) {
-    // Define the order of sections for the provider page.
-    // This list makes the structure clean and easy to modify.
-    final List<Widget> providerSections = [
-      ProviderHeroSection(floatingController: _floatingParticlesController,),
-      // ProviderFeaturesSection( 
-      //   // Assuming ProviderFeaturesSection might use the scrollController for parallax or scroll-triggered animations.
-      //   // If not, this parameter can be removed from its constructor.
-      //   scrollController: _scrollController, 
-      // ),
-      ProviderHowItWorksSection(
-        // Assuming ProviderHowItWorksSection might use the scrollController.
-        scrollController: _scrollController, 
-      ),
-      const ProviderPricingSection(), // Assumed to be self-contained or uses a different animation mechanism.
-      ProviderCtaSection(
-        // ProviderCtaSection also uses the floatingParticlesController.
-        floatingParticlesController: _floatingParticlesController,
-      ),
-      FooterSection( 
-        scrollController: _scrollController, 
-      ),
-    ];
+      // --- !!! IMPORTANT DEBUGGING STEP !!! ---
+      // Add your sections back ONE BY ONE.
+      // 1. Start with an empty list or just one simple container. Test.
+      // 2. Add ProviderHeroSection. Test.
+      // 3. Add ProviderHowItWorksSection. Test.
+      // And so on...
+      final List<Widget> providerSections = [
+        // STEP 1: Start with this simple container. Does it show?
+        // If yes, comment it out and proceed to uncomment your actual sections one by one.
+        // Container(height: 200, color: Colors.greenAccent, alignment: Alignment.center, child: Text("Test Container - Start Here")),
 
-    return Scaffold(
-      extendBodyBehindAppBar: true, 
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: ModernAppBar(
-        scrollController: _scrollController,
-        // The 'isProviderPage' parameter was removed as it caused an error.
-        // If your ModernAppBar needs to behave differently on provider pages,
-        // you must add 'isProviderPage' as a parameter to its constructor.
-        // For example: final bool isProviderPage; and in constructor this.isProviderPage = false,
-        // Then you could pass: isProviderPage: true,
-        // onMenuTap: _showProviderMobileMenu, // Optional: Implement if you need a different mobile menu
-      ),
-      body: Animate( // Apply entry animation to the entire page content for a smooth load-in
-        controller: _pageEntryController,
-        effects: const [
-          FadeEffect(duration: Duration(milliseconds: 500) , curve: Curves.easeOut), 
-          SlideEffect(begin: Offset(0, 0.02), end: Offset.zero, duration: Duration(milliseconds: 500), curve: Curves.easeOut) 
-        ],
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              controller: _scrollController,
-              physics: const BouncingScrollPhysics(), 
-              child: Column(
-                children: providerSections.map((section) {
-                  // Each section is rendered directly.
-                  // For more complex staggered animations per section,
-                  // you could wrap each 'section' in its own Animate widget here,
-                  // or handle entry animations within each section's own build method.
-                  return section;
-                }).toList(),
-              ),
-            ),
-            // Scroll-to-top button, aligned to the bottom right
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                // Correct Instantiation: Ensure ScrollToTopButton is a class and imported correctly.
-                // If your widget is named ScrollToTopFAB, use that name here.
-                child: ScrollToTopFAB(scrollController: _scrollController), 
-              ),
-            ),
-          ],
+        // STEP 2: Uncomment ProviderHeroSection ONLY. Test. If blank, this is the problem.
+        ProviderHeroSection(key: const ValueKey("provider_hero"), floatingParticlesController: _floatingParticlesController),
+
+        // STEP 3: If ProviderHeroSection worked, comment it back in, then uncomment ProviderHowItWorksSection. Test.
+        ProviderHowItWorksSection(key: const ValueKey("provider_how_it_works"), scrollController: _scrollController),
+
+        // STEP 4: Continue for each section...
+        const ProviderPricingSection(key: ValueKey("provider_pricing")),
+        // ProviderCtaSection(key: const ValueKey("provider_cta"), floatingParticlesController: _floatingParticlesController),
+        // FooterSection(key: const ValueKey("footer_section_provider"), scrollController: _scrollController),
+      ];
+      print("[ProviderServicesScreen - SECTION TEST] build: providerSections populated. Count: ${providerSections.length}");
+      if (providerSections.isEmpty){
+          print("[ProviderServicesScreen - SECTION TEST] build: providerSections IS EMPTY! Displaying message.");
+      }
+
+
+      return Scaffold(
+        extendBodyBehindAppBar: true,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        appBar: ModernAppBar( // Assuming ModernAppBar is working correctly
+          scrollController: _scrollController,
         ),
-      ),
-    );
+        body: Animate(
+          controller: _pageEntryController,
+          effects: const [
+            FadeEffect(duration: Duration(milliseconds: 500), curve: Curves.easeOut),
+            SlideEffect(begin: Offset(0, 0.02), end: Offset.zero, duration: Duration(milliseconds: 500), curve: Curves.easeOut)
+          ],
+          child: Stack(
+            children: [
+              SingleChildScrollView(
+                controller: _scrollController,
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  children: providerSections.isEmpty
+                    ? [Container(height: 300, alignment:Alignment.center, child: const Text("No sections are currently active in providerSections list.", style: TextStyle(fontSize: 18, color: Colors.red)))]
+                    : providerSections.map((section) {
+                        print("[ProviderServicesScreen - SECTION TEST] build: Building section: ${section.key ?? section.runtimeType}");
+                        return section;
+                      }).toList(),
+                ),
+              ),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: ScrollToTopFAB(scrollController: _scrollController),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
   }
-
-  // Optional: Placeholder for a provider-specific mobile menu if needed.
-  // void _showProviderMobileMenu() {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     backgroundColor: Colors.transparent,
-  //     isScrollControlled: true,
-  //     builder: (context) {
-  //       // Build your provider-specific mobile menu UI here
-  //       return Container(
-  //         height: MediaQuery.of(context).size.height * 0.6, 
-  //         padding: const EdgeInsets.all(20),
-  //         decoration: BoxDecoration(
-  //            color: Theme.of(context).cardColor,
-  //            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-  //         ),
-  //         child: const Center(child: Text("Provider Specific Mobile Menu")),
-  //       );
-  //     },
-  //   );
-  // }
-}

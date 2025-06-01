@@ -1,35 +1,40 @@
-// lib/features/provider/presentation/widgets/provider_pricing_section.dart
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:shamil_web/core/constants/app_strings.dart';
-import 'package:shamil_web/core/widgets/custom_button.dart';
+// import 'package:easy_localization/easy_localization.dart'; // Temporarily commented for hardcoded strings
+// import 'package:flutter_animate/flutter_animate.dart'; // You can re-add if needed, removed for max simplicity now
+// import 'package:shamil_web/core/constants/app_strings.dart'; // Temporarily commented
+import 'package:shamil_web/core/widgets/custom_button.dart'; // Assuming this is working
 import 'package:shamil_web/core/utils/helpers.dart';
 import 'package:shamil_web/core/constants/app_dimensions.dart';
-import 'package:shamil_web/core/constants/app_colors.dart'; // For Shamil colors
+import 'package:shamil_web/core/constants/app_colors.dart';
 
+// Data class for pricing plans
 class PricingPlanData {
-  final String nameKey;
-  final String targetKey;
-  final String priceKey;
-  final List<String> features; // Direct strings, not keys, for simplicity here
+  final String id; // Added id for keying
+  final String name; // Direct string
+  final String target; // Direct string
+  final String price;  // Direct string
+  final List<String> features; // Direct strings
   final bool isPopular;
-  final String ctaKey;
+  final String ctaText; // Direct string
   final VoidCallback onCtaPressed;
   final Color highlightColor;
+  final String popularTagText; // Direct string
 
   const PricingPlanData({
-    required this.nameKey,
-    required this.targetKey,
-    required this.priceKey,
+    required this.id,
+    required this.name,
+    required this.target,
+    required this.price,
     required this.features,
     this.isPopular = false,
-    required this.ctaKey,
+    required this.ctaText,
     required this.onCtaPressed,
     required this.highlightColor,
+    this.popularTagText = "MOST POPULAR", // Default hardcoded
   });
 }
 
+// Main Section Widget
 class ProviderPricingSection extends StatelessWidget {
   const ProviderPricingSection({super.key});
 
@@ -37,130 +42,145 @@ class ProviderPricingSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isMobile = Helpers.responsiveValue(context, mobile: true, desktop: false);
+    print("[ProviderPricingSection] build: isMobile = $isMobile");
 
-    // Define pricing plans data
     final List<PricingPlanData> plans = [
       PricingPlanData(
-        nameKey: ProviderStrings.basePlanName,
-        targetKey: ProviderStrings.basePlanTarget,
-        priceKey: ProviderStrings.basePlanPrice,
+        id: "base",
+        name: "Base Plan",
+        target: "For individuals & small teams",
+        price: "\$19/mo",
         features: [
-          "${ProviderStrings.pricingFeatureBookings.tr()}: ${ProviderStrings.bookingsBasic.tr()}",
-          "${ProviderStrings.pricingFeatureSubscriptions.tr()}: ${ProviderStrings.subscriptionsLimited.tr()}",
-          "${ProviderStrings.pricingFeatureNfcQr.tr()}: ${ProviderStrings.nfcQrStandard.tr()}",
-          "${ProviderStrings.pricingFeatureAnalytics.tr()}: ${ProviderStrings.analyticsStandard.tr()}",
-          "${ProviderStrings.pricingFeatureSupport.tr()}: ${ProviderStrings.supportEmail.tr()}",
+          "Bookings: Basic",
+          "Subscriptions: Limited",
+          "NFC/QR: Standard",
+          "Analytics: Standard",
+          "Support: Email",
         ],
-        ctaKey: ProviderStrings.choosePlan,
-        onCtaPressed: () { /* TODO: Handle Base Plan CTA */ },
+        ctaText: "Choose Plan",
+        onCtaPressed: () { print("Base Plan CTA Pressed"); },
         highlightColor: AppColors.primary.withOpacity(0.7),
       ),
       PricingPlanData(
-        nameKey: ProviderStrings.proPlanName,
-        targetKey: ProviderStrings.proPlanTarget,
-        priceKey: ProviderStrings.proPlanPrice,
+        id: "pro",
+        name: "Pro Plan",
+        target: "For growing businesses",
+        price: "\$49/mo",
         features: [
-          "${ProviderStrings.pricingFeatureBookings.tr()}: ${ProviderStrings.bookingsAdvanced.tr()}",
-          "${ProviderStrings.pricingFeatureSubscriptions.tr()}: ${ProviderStrings.subscriptionsMultiple.tr()}",
-          "${ProviderStrings.pricingFeatureNfcQr.tr()}: ${ProviderStrings.nfcQrHigherLimits.tr()}",
-          "${ProviderStrings.pricingFeatureAnalytics.tr()}: ${ProviderStrings.analyticsEnhanced.tr()}",
-          "${ProviderStrings.pricingFeatureSupport.tr()}: ${ProviderStrings.supportPriorityChat.tr()}",
-          "Advanced Customer Segmentation", // Example of an extra feature
+          "Bookings: Advanced",
+          "Subscriptions: Multiple",
+          "NFC/QR: Higher Limits",
+          "Analytics: Enhanced",
+          "Support: Priority Chat",
+          "Advanced Customer Segmentation",
         ],
         isPopular: true,
-        ctaKey: ProviderStrings.choosePlan,
-        onCtaPressed: () { /* TODO: Handle Pro Plan CTA */ },
+        popularTagText: "POPULAR CHOICE",
+        ctaText: "Choose Plan",
+        onCtaPressed: () { print("Pro Plan CTA Pressed"); },
         highlightColor: AppColors.primaryGold,
       ),
       PricingPlanData(
-        nameKey: ProviderStrings.enterprisePlanName,
-        targetKey: ProviderStrings.enterprisePlanTarget,
-        priceKey: ProviderStrings.enterprisePlanPrice,
+        id: "enterprise",
+        name: "Enterprise Plan",
+        target: "For large scale operations",
+        price: "Custom Pricing",
         features: [
-          "${ProviderStrings.pricingFeatureBookings.tr()}: ${ProviderStrings.bookingsFullyCustom.tr()}",
-          "${ProviderStrings.pricingFeatureSubscriptions.tr()}: ${ProviderStrings.subscriptionsCustomRules.tr()}",
-          "${ProviderStrings.pricingFeatureNfcQr.tr()}: ${ProviderStrings.nfcQrCustomHighVolume.tr()}",
-          "${ProviderStrings.pricingFeatureAnalytics.tr()}: ${ProviderStrings.analyticsAdvancedBI.tr()}",
-          "${ProviderStrings.pricingFeatureSupport.tr()}: ${ProviderStrings.supportDedicatedManager.tr()}",
-          "API Access & Integrations", // Example
-          "Custom SLAs", // Example
+          "Bookings: Fully Custom",
+          "Subscriptions: Custom Rules",
+          "NFC/QR: Custom High Volume",
+          "Analytics: Advanced BI",
+          "Support: Dedicated Manager",
+          "API Access & Integrations",
         ],
-        ctaKey: ProviderStrings.contactUs,
-        onCtaPressed: () { /* TODO: Handle Enterprise Plan CTA */ },
+        ctaText: "Contact Us",
+        onCtaPressed: () { print("Enterprise Plan CTA Pressed"); },
         highlightColor: AppColors.accent.withOpacity(0.8),
       ),
     ];
 
     return Container(
+      key: const ValueKey("ProviderPricingSectionContainer"),
       padding: EdgeInsets.symmetric(
         vertical: isMobile ? AppDimensions.paddingSectionVertical * 0.8 : AppDimensions.paddingSectionVertical,
         horizontal: AppDimensions.paddingPageHorizontal,
       ),
-      color: theme.brightness == Brightness.light ? Colors.grey.shade100 : theme.colorScheme.surface.withOpacity(0.8),
+      color: theme.brightness == Brightness.light ? Colors.grey.shade100 : theme.colorScheme.surfaceVariant, // Slightly different color for testing
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            ProviderStrings.pricingSectionTitle.tr(),
+            "Flexible Pricing For Everyone", // Hardcoded
             textAlign: TextAlign.center,
             style: Helpers.responsiveValue(
               context,
-              mobile: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
-              desktop: theme.textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
+              mobile: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface) ?? TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
+              desktop: theme.textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface) ?? TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
             ),
-          ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.1),
+          ), // .animate().fadeIn(delay: 100.ms).slideY(begin: 0.1), // Animations removed for stability test
           const SizedBox(height: AppDimensions.spacingMedium),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingMedium),
             child: Text(
-              ProviderStrings.pricingSectionSubtitle.tr(),
+              "Find the perfect plan tailored to your business needs and scale as you grow.", // Hardcoded
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSurface.withOpacity(0.75),
                 height: 1.5,
-              ),
-            ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
+              ) ?? TextStyle(fontSize: 16, color: theme.colorScheme.onSurface.withOpacity(0.75), height: 1.5),
+            ), // .animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
           ),
-          const SizedBox(height: AppDimensions.spacingExtraLarge * 1.5),
+          const SizedBox(height: AppDimensions.spacingExtraLarge * 1.2), // Slightly reduced
           isMobile
               ? Column(
-                  children: plans.map((plan) => 
+                  mainAxisSize: MainAxisSize.min,
+                  children: plans.map((plan) =>
                     Padding(
+                      key: ValueKey("MobilePlan_${plan.id}"),
                       padding: const EdgeInsets.only(bottom: AppDimensions.paddingLarge),
-                      child: _PricingCard(plan: plan, theme: theme).animate().fadeIn(delay: (300 + plans.indexOf(plan) * 100).ms)
+                      child: _PricingCard(plan: plan, theme: theme)
+                      // .animate().fadeIn(delay: (300 + plans.indexOf(plan) * 100).ms) // Animations removed
                     )
                   ).toList(),
                 )
               : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start, // Align cards to top if heights differ
-                  children: plans.map((plan) => 
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: plans.map((plan) =>
                     Expanded(
+                      key: ValueKey("DesktopPlan_${plan.id}"),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingSmall),
-                        child: _PricingCard(plan: plan, theme: theme).animate().fadeIn(delay: (400 + plans.indexOf(plan) * 150).ms)
+                        child: _PricingCard(plan: plan, theme: theme)
+                        // .animate().fadeIn(delay: (400 + plans.indexOf(plan) * 150).ms) // Animations removed
                       ),
                     )
                   ).toList(),
                 ),
           const SizedBox(height: AppDimensions.spacingLarge),
           Text(
-            ProviderStrings.moneyBackGuarantee.tr(),
+            "All plans come with our satisfaction guarantee.", // Hardcoded
             style: theme.textTheme.bodyMedium?.copyWith(
               fontStyle: FontStyle.italic,
               color: theme.colorScheme.onSurface.withOpacity(0.6),
-            ),
-          ).animate().fadeIn(delay: 800.ms),
+            ) ?? TextStyle(fontStyle: FontStyle.italic, color: theme.colorScheme.onSurface.withOpacity(0.6)),
+          ), // .animate().fadeIn(delay: 800.ms),
         ],
       ),
     );
   }
 }
 
+// StatefulWidget for the Pricing Card
 class _PricingCard extends StatefulWidget {
   final PricingPlanData plan;
   final ThemeData theme;
 
-  const _PricingCard({required this.plan, required this.theme});
+  const _PricingCard({
+    // Key is automatically handled by StatefulWidget if needed by parent
+    required this.plan,
+    required this.theme,
+  });
 
   @override
   State<_PricingCard> createState() => _PricingCardState();
@@ -198,6 +218,7 @@ class _PricingCardState extends State<_PricingCard> {
             padding: const EdgeInsets.all(AppDimensions.paddingLarge + 4),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min, // CRITICAL: Allows Column to determine its height by content
               children: [
                 if (plan.isPopular)
                   Align(
@@ -212,61 +233,68 @@ class _PricingCardState extends State<_PricingCard> {
                         ),
                       ),
                       child: Text(
-                        ProviderStrings.mostPopular.tr().toUpperCase(),
+                        plan.popularTagText.toUpperCase(), // Using direct string from plan
                         style: theme.textTheme.labelSmall?.copyWith(
-                            color: AppColors.textOnGold, fontWeight: FontWeight.bold),
+                            color: AppColors.textOnGold, fontWeight: FontWeight.bold) ??
+                            TextStyle(color: AppColors.textOnGold ?? Colors.white, fontWeight: FontWeight.bold, fontSize: 10),
                       ),
                     ),
                   ),
-                if (!plan.isPopular) const SizedBox(height: 29), // Placeholder for alignment with popular badge
-                
+                if (!plan.isPopular)
+                   // Adjust height to match your popular badge's typical height for alignment
+                  const SizedBox(height: 29), // You might need to adjust this value
+
                 Text(
-                  plan.nameKey.tr(),
+                  plan.name, // Direct string
                   textAlign: TextAlign.center,
                   style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold, color: plan.highlightColor),
+                      fontWeight: FontWeight.bold, color: plan.highlightColor) ??
+                      TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: plan.highlightColor),
                 ),
                 Text(
-                  plan.targetKey.tr(),
+                  plan.target, // Direct string
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium
-                      ?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.7)),
+                      ?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.7)) ??
+                      TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
                 ),
                 const SizedBox(height: AppDimensions.spacingMedium),
                 Text(
-                  plan.priceKey.tr(),
+                  plan.price, // Direct string
                   textAlign: TextAlign.center,
                   style: theme.textTheme.displaySmall?.copyWith(
-                      fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
+                      fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface) ??
+                      TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
                 ),
                 const SizedBox(height: AppDimensions.spacingLarge),
-                Expanded(
-                  child: ListView.builder(
-                    shrinkWrap: true, // Important if inside another scrollable or fixed height
-                    physics: const NeverScrollableScrollPhysics(), // If card has fixed height
-                    itemCount: plan.features.length,
-                    itemBuilder: (ctx, i) => Padding(
-                      padding: const EdgeInsets.only(bottom: AppDimensions.spacingSmall),
-                      child: Row(
-                        children: [
-                          Icon(Icons.check_circle_outline,
-                              color: plan.highlightColor.withOpacity(0.8), size: 20),
-                          const SizedBox(width: AppDimensions.spacingSmall),
-                          Expanded(
-                            child: Text(
-                              plan.features[i], // Features are already translated
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.onSurface.withOpacity(0.8)),
-                            ),
+
+                // Features List - NOT wrapped in Expanded
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: plan.features.length,
+                  itemBuilder: (ctx, i) => Padding(
+                    padding: const EdgeInsets.only(bottom: AppDimensions.spacingSmall),
+                    child: Row(
+                      children: [
+                        Icon(Icons.check_circle_outline,
+                            color: plan.highlightColor.withOpacity(0.8), size: 20),
+                        const SizedBox(width: AppDimensions.spacingSmall),
+                        Expanded(
+                          child: Text(
+                            plan.features[i], // Direct strings
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurface.withOpacity(0.8)) ??
+                                TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.8)),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
                 const SizedBox(height: AppDimensions.spacingLarge),
                 CustomButton(
-                  text: plan.ctaKey.tr(),
+                  text: plan.ctaText, // Direct string
                   onPressed: plan.onCtaPressed,
                   backgroundColor: plan.isPopular ? AppColors.primaryGold : plan.highlightColor,
                   foregroundColor: plan.isPopular ? AppColors.textOnGold : Colors.white,
