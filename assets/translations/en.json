@@ -187,5 +187,33 @@
   "providerCtaSubtitle": "Join thousands of successful providers on Shamil and unlock your full potential.",
   "uptimeIndicator": "99.9% Uptime",
   "supportIndicator": "24/7 Support",
-  "trustedByIndicator": "Trusted by 1000+ Providers"
+  "trustedByIndicator": "Trusted by 1000+ Providers",
+  
+  "providerFeaturesSectionTitle": "Powerful Tools to Elevate Your Service",
+  "providerFeaturesSectionSubtitle": "Everything you need to manage, grow, and scale your business in one platform",
+  
+  "providerTestimonialsTitle": "Success Stories from Our Partners",
+  "providerTestimonialsSubtitle": "Join thousands of providers who transformed their business with Shamil",
+  
+  "providerFaqTitle": "Frequently Asked Questions",
+  "providerFaqSubtitle": "Get answers to common questions about becoming a Shamil provider",
+  
+  "faqQuestion1": "How quickly can I get started with Shamil?",
+  "faqAnswer1": "You can start using Shamil within minutes! Simply sign up, complete your provider profile, add your services, and you're ready to accept bookings. Our onboarding process is designed to be quick and intuitive.",
+  
+  "faqQuestion2": "What payment methods does Shamil support?",
+  "faqAnswer2": "Shamil supports multiple payment methods including credit/debit cards, digital wallets, bank transfers, and cash payments. We handle all the payment processing securely, and funds are transferred to your account automatically.",
+  
+  "faqQuestion3": "Can I customize my booking rules and availability?",
+  "faqAnswer3": "Absolutely! You have complete control over your availability, booking rules, cancellation policies, and service durations. Set buffer times between appointments, block out holidays, and create recurring schedules with ease.",
+  
+  "faqQuestion4": "How does the subscription management work?",
+  "faqAnswer4": "Our subscription management allows you to create membership plans, recurring services, and package deals. Set up automatic renewals, track member benefits, and manage multiple subscription tiers all from one dashboard.",
+  
+  "faqQuestion5": "Is my business data secure with Shamil?",
+  "faqAnswer5": "Security is our top priority. We use enterprise-grade encryption, secure cloud infrastructure, and regular security audits. Your data is backed up continuously and you maintain full ownership. We're also GDPR compliant.",
+  
+  "faqQuestion6": "What kind of support do I get?",
+  "faqAnswer6": "We offer comprehensive support including 24/7 chat support, video tutorials, documentation, and dedicated account managers for Pro and Enterprise plans. Our team is always ready to help you succeed."
 }
+

@@ -1,23 +1,20 @@
-// lib/features/provider/presentation/widgets/provider_cta_section.dart
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart'; // Ensure setup is correct
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:shamil_web/core/constants/app_strings.dart';
-import 'package:shamil_web/core/widgets/custom_button.dart';
+import 'package:shamil_web/core/constants/app_strings.dart'; // Ensure ProviderStrings are defined
+import 'package:shamil_web/core/widgets/custom_button.dart'; // Ensure this is working
 import 'package:shamil_web/core/utils/helpers.dart';
 import 'package:shamil_web/core/constants/app_dimensions.dart';
-import 'package:shamil_web/core/constants/app_colors.dart'; // For Shamil colors
+import 'package:shamil_web/core/constants/app_colors.dart';
 
-// Re-using Particle definitions from ProviderHeroSection for consistency
-// If this becomes common, move ParticlePainter and FloatingParticle to a shared location.
 class FloatingParticle {
   Offset position;
   double radius;
   Color color;
   double speed;
   double opacity;
-  double angle; // Added for varied movement, consistent with Hero section
+  double angle;
 
   FloatingParticle({
     required this.position,
@@ -32,7 +29,6 @@ class FloatingParticle {
 class ParticlePainter extends CustomPainter {
   final List<FloatingParticle> particles;
   final Animation<double> animation;
-  final math.Random random = math.Random(); // Instance of random
 
   ParticlePainter({required this.particles, required this.animation})
       : super(repaint: animation);
@@ -40,35 +36,22 @@ class ParticlePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint();
-    if (size.isEmpty) return; // Avoid painting if size is not yet determined
+    if (size.isEmpty || particles.isEmpty) return;
 
     for (var particle in particles) {
-      // Update particle position: gentle drift
       double dx = math.cos(particle.angle) * particle.speed * 0.1;
       double dy = math.sin(particle.angle) * particle.speed * 0.1;
+      double newX = particle.position.dx + dx;
+      double newY = particle.position.dy - dy;
 
-      // Ensure particle.position is updated correctly
-      double newX = (particle.position.dx + dx);
-      double newY = (particle.position.dy - dy);
-
-      // Wrap around logic for particles
-      if (newX < 0) {
-        newX = size.width + newX; // Wrap from left to right
-      } else if (newX > size.width) {
-        newX = newX % size.width; // Wrap from right to left
-      }
-
-      if (newY < 0) {
-        newY = size.height + newY; // Wrap from top to bottom
-      } else if (newY > size.height) {
-        newY = newY % size.height; // Wrap from bottom to top
-      }
+      if (newX < -particle.radius) newX = size.width + particle.radius;
+      if (newX > size.width + particle.radius) newX = -particle.radius;
+      if (newY < -particle.radius) newY = size.height + particle.radius;
+      if (newY > size.height + particle.radius) newY = -particle.radius;
       particle.position = Offset(newX, newY);
-      
-      // Corrected: Use the calculated dynamicPulseOpacity for the particle's final opacity
-      final double dynamicPulseOpacity = (0.4 + (math.sin(animation.value * math.pi * 2 + particle.angle) + 1) / 5);
-      // *** ERROR FIX: Changed pulseValue to dynamicPulseOpacity ***
-      paint.color = particle.color.withOpacity(particle.opacity * dynamicPulseOpacity); 
+
+      final double dynamicPulseOpacity = (0.5 + (math.sin(animation.value * 2 * math.pi + particle.angle * 2) + 1) / 4).clamp(0.1, 1.0);
+      paint.color = particle.color.withOpacity(particle.opacity * dynamicPulseOpacity);
       canvas.drawCircle(particle.position, particle.radius, paint);
     }
   }
@@ -92,116 +75,102 @@ class ProviderCtaSection extends StatefulWidget {
 
 class _ProviderCtaSectionState extends State<ProviderCtaSection> with TickerProviderStateMixin {
   List<FloatingParticle> _particles = [];
-  final int _numParticles = 20; // Fewer particles for CTA
+  final int _numParticles = 25;
   final math.Random _random = math.Random();
-  late AnimationController _pulseController;
-
+  late AnimationController _pulseButtonController;
+  Size? _lastKnownSize;
 
   @override
   void initState() {
     super.initState();
-     _pulseController = AnimationController(
+    print("[ProviderCtaSection] initState");
+    _pulseButtonController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1800),
     )..repeat(reverse: true);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        // Ensure that MediaQuery.of(context).size is available and valid
-        final mediaQueryData = MediaQuery.of(context);
-        if (mediaQueryData.size.width > 0 && mediaQueryData.size.height > 0) {
-            _initParticles(mediaQueryData.size);
-        }
-        // No need to call setState here if ParticlePainter repaints based on controller
-        // and _particles list is not rebuilt frequently after this initial setup.
-        // However, if _initParticles itself needs to trigger a rebuild of the CustomPaint
-        // because the _particles list has changed, then setState is needed.
-      }
-    });
   }
 
   void _initParticles(Size size) {
-   if (!mounted || size.isEmpty) return; // Check if size is valid
+    print("[ProviderCtaSection] _initParticles called with size: $size");
+    if (!mounted || size.isEmpty || (_lastKnownSize == size && _particles.isNotEmpty)) {
+      if(size.isEmpty) print("[ProviderCtaSection] _initParticles: Skipped due to empty size.");
+      return;
+    }
+    _lastKnownSize = size;
+
     _particles = List.generate(_numParticles, (index) {
       return FloatingParticle(
         position: Offset(_random.nextDouble() * size.width, _random.nextDouble() * size.height),
-        radius: _random.nextDouble() * 1.2 + 0.3, // Even smaller
+        radius: _random.nextDouble() * 1.5 + 0.5,
         color: _random.nextBool()
-            ? AppColors.primary.withOpacity(0.15)
-            : AppColors.primaryGold.withOpacity(0.15),
-        speed: _random.nextDouble() * 0.2 + 0.05, // Very slow
-        opacity: _random.nextDouble() * 0.3 + 0.05, // Very subtle
-        angle: _random.nextDouble() * 2 * math.pi, // Add angle
+            ? AppColors.primary.withOpacity(0.2)
+            : AppColors.primaryGold.withOpacity(0.2),
+        speed: _random.nextDouble() * 0.25 + 0.05,
+        opacity: _random.nextDouble() * 0.4 + 0.1,
+        angle: _random.nextDouble() * 2 * math.pi,
       );
     });
-    // This setState is important to ensure the CustomPaint widget rebuilds
-    // with the newly initialized _particles list.
-    if(mounted) {
-      setState((){});
-    }
+    print("[ProviderCtaSection] Particles initialized: ${_particles.length}");
   }
 
-   @override
+  @override
   void dispose() {
-    _pulseController.dispose();
+    print("[ProviderCtaSection] dispose");
+    _pulseButtonController.dispose();
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isMobile = Helpers.responsiveValue(context, mobile: true, desktop: false);
     const shamilBlue = AppColors.primary;
     const shamilGold = AppColors.primaryGold;
+    print("[ProviderCtaSection] build called");
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        vertical: AppDimensions.paddingSectionVertical,
+      key: const ValueKey("ProviderCtaSectionContainer"),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppDimensions.paddingSectionVertical * 1.2,
         horizontal: AppDimensions.paddingPageHorizontal,
       ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: theme.brightness == Brightness.dark
-              ? [shamilBlue.withOpacity(0.9), shamilGold.withOpacity(0.75), shamilBlue.withOpacity(0.9)]
-              : [shamilBlue, Color.lerp(shamilBlue, shamilGold, 0.6)!, shamilGold],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
+              ? [shamilBlue.withOpacity(0.85), shamilGold.withOpacity(0.7), shamilBlue.withOpacity(0.85)]
+              : [shamilBlue, Color.lerp(shamilBlue, shamilGold, 0.55)!, shamilGold],
+          begin: const FractionalOffset(0.0, 0.5),
+          end: const FractionalOffset(1.0, 0.5),
+          stops: const [0.0, 0.5, 1.0],
+          transform: const GradientRotation(math.pi / 40),
         ),
       ),
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Conditionally build CustomPaint only if particles are initialized and size is available
-          LayoutBuilder( // Use LayoutBuilder to get constraints for CustomPaint
-            builder: (context, constraints) {
-              // Check if constraints are valid and particles are initialized
-              if (_particles.isNotEmpty && constraints.biggest.isFinite && constraints.biggest.width > 0 && constraints.biggest.height > 0) {
-                 // Optional: Re-initialize particles if the size changes significantly,
-                 // or if they were initialized with a zero size.
-                bool shouldReinitialize = false;
-                if (_particles.isNotEmpty) {
-                    // A simple check: if the first particle's initial random position is now out of bounds,
-                    // it might indicate the canvas size was 0 or very small during the first _initParticles call.
-                    final firstParticle = _particles.first;
-                    if (firstParticle.position.dx > constraints.maxWidth || firstParticle.position.dx < 0 ||
-                        firstParticle.position.dy > constraints.maxHeight || firstParticle.position.dy < 0) {
-                       // This condition might be too sensitive. A better check would be if the
-                       // size used for the *last* _initParticles call is different from current constraints.
-                       // For simplicity now, we'll rely on the initial initState call with MediaQuery.
-                    }
+          Positioned.fill(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                if (constraints.hasBoundedWidth && constraints.hasBoundedHeight && constraints.biggest.width > 0 && constraints.biggest.height > 0) {
+                  if(_particles.isEmpty || _lastKnownSize != constraints.biggest) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) { // Check mounted again inside post frame callback
+                           _initParticles(constraints.biggest);
+                           // Potentially call setState if _initParticles doesn't trigger repaint via animation listener
+                           // For now, relying on ParticlePainter's animation repaint
+                           if (_particles.isNotEmpty) setState(() {});
+                        }
+                    });
+                  }
+                  if (_particles.isNotEmpty) {
+                    return CustomPaint(
+                      size: constraints.biggest,
+                      painter: ParticlePainter(particles: _particles, animation: widget.floatingParticlesController),
+                    );
+                  }
                 }
-
-
-                return CustomPaint(
-                  size: constraints.biggest, // Ensure CustomPaint uses available space
-                  painter: ParticlePainter(particles: _particles, animation: widget.floatingParticlesController),
-                  child: const SizedBox.expand(),
-                );
-              }
-              // Return an empty SizedBox if particles are not ready or constraints are not valid
-              return const SizedBox.expand(); 
-            }
+                return const SizedBox.shrink();
+              },
+            ),
           ),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -211,8 +180,8 @@ class _ProviderCtaSectionState extends State<ProviderCtaSection> with TickerProv
                 textAlign: TextAlign.center,
                 style: Helpers.responsiveValue(
                   context,
-                  mobile: theme.textTheme.headlineMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
-                  desktop: theme.textTheme.displaySmall?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                  mobile: theme.textTheme.headlineMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: -0.5) ?? TextStyle(fontSize: 28, color: Colors.white, fontWeight: FontWeight.bold),
+                  desktop: theme.textTheme.displaySmall?.copyWith(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: -1) ?? TextStyle(fontSize: 40, color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.2),
               const SizedBox(height: AppDimensions.spacingMedium),
@@ -222,29 +191,32 @@ class _ProviderCtaSectionState extends State<ProviderCtaSection> with TickerProv
                   ProviderStrings.ctaSubtitle.tr(),
                   textAlign: TextAlign.center,
                   style: theme.textTheme.titleLarge?.copyWith(
-                    color: Colors.white.withOpacity(0.85),
-                    height: 1.5,
-                  ),
+                        color: Colors.white.withOpacity(0.9),
+                        height: 1.6,
+                      ) ?? TextStyle(fontSize: 18, color: Colors.white.withOpacity(0.9), height: 1.6),
                 ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2),
               ),
-              const SizedBox(height: AppDimensions.spacingLarge * 1.5),
+              const SizedBox(height: AppDimensions.spacingLarge * 1.8),
               AnimatedBuilder(
-                animation: _pulseController,
+                animation: _pulseButtonController,
                 builder: (context, child) {
-                  final pulseScale = 1.0 + (_pulseController.value * 0.03);
+                  final pulseScale = 1.0 + (_pulseButtonController.value * 0.035);
                   return Transform.scale(
                     scale: pulseScale,
-                    child: CustomButton(
-                      text: ProviderStrings.getStartedToday.tr(),
-                      onPressed: () { /* TODO: Handle Get Started CTA */ },
-                      backgroundColor: AppColors.white,
-                      foregroundColor: shamilBlue,
-                      elevation: 10,
-                      icon: const Icon(Icons.rocket_launch_rounded, size: 22),
-                    ),
+                    child: child,
                   );
                 },
-              ).animate().fadeIn(delay: 400.ms).scale(begin: const Offset(0.8,0.8)),
+                child: CustomButton(
+                  text: ProviderStrings.getStartedToday.tr(),
+                  onPressed: () { print("Get Started Today CTA Pressed"); /* TODO: Handle Get Started CTA */ },
+                  backgroundColor: AppColors.white,
+                  foregroundColor: shamilBlue,
+                  elevation: 12,
+                  icon: const Icon(Icons.rocket_launch_rounded, size: 24),
+                  // REMOVED 'padding' parameter
+                  // REMOVED 'textStyle' parameter
+                ),
+              ).animate().fadeIn(delay: 400.ms).scale(begin: const Offset(0.8, 0.8), duration: 600.ms, curve: Curves.elasticOut),
               const SizedBox(height: AppDimensions.spacingLarge * 1.5),
               Wrap(
                 spacing: AppDimensions.paddingLarge,
@@ -255,7 +227,7 @@ class _ProviderCtaSectionState extends State<ProviderCtaSection> with TickerProv
                   _buildTrustIndicator(theme, Icons.support_agent_rounded, ProviderStrings.supportIndicator.tr()),
                   _buildTrustIndicator(theme, Icons.people_alt_outlined, ProviderStrings.trustedByIndicator.tr()),
                 ],
-              ).animate().fadeIn(delay: 600.ms),
+              ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.3),
             ],
           ),
         ],
@@ -267,11 +239,11 @@ class _ProviderCtaSectionState extends State<ProviderCtaSection> with TickerProv
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, color: Colors.white.withOpacity(0.8), size: 20),
-        const SizedBox(width: AppDimensions.spacingSmall),
+        Icon(icon, color: Colors.white.withOpacity(0.85), size: 18),
+        const SizedBox(width: AppDimensions.spacingSmall - 2),
         Text(
           text,
-          style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white.withOpacity(0.8)),
+          style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white.withOpacity(0.85)) ?? TextStyle(color: Colors.white.withOpacity(0.85)),
         ),
       ],
     );
