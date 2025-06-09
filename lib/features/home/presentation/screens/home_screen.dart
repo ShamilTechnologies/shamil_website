@@ -104,6 +104,14 @@ class _HomeScreenState extends State<HomeScreen>
         widget: EnhancedRocketSeparatorSection(scrollController: _scrollController),
         showInMenu: false,
       ),
+      HomeScreenSectionData(
+        id: 'mobile_app_pages',
+        titleKey: AppStrings.mobileAppPagesTitle,
+        icon: Icons.phone_android_outlined,
+        subtitleKey: 'seeOurAppInAction', // Example subtitle key
+        key: _mobileAppPagesKey,
+        widget: MobileAppPagesSection(scrollController: _scrollController),
+      ),
        HomeScreenSectionData(
         id: 'ai_showcase', // Unique ID for the new section
         titleKey: 'AI Showcase', // Placeholder menu title, use AppStrings key
@@ -112,14 +120,6 @@ class _HomeScreenState extends State<HomeScreen>
         key: _aiShowcaseKey,
         widget: const ShamilAiShowcaseSection(),
         showInMenu: true, // Decide if it should appear in the mobile jump-to menu
-      ),
-      HomeScreenSectionData(
-        id: 'mobile_app_pages',
-        titleKey: AppStrings.mobileAppPagesTitle,
-        icon: Icons.phone_android_outlined,
-        subtitleKey: 'seeOurAppInAction', // Example subtitle key
-        key: _mobileAppPagesKey,
-        widget: MobileAppPagesSection(scrollController: _scrollController),
       ),
       HomeScreenSectionData(
         id: 'how_it_works',

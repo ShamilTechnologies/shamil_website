@@ -237,4 +237,11 @@ class ProviderStrings {
   static const String uptimeIndicator = 'uptimeIndicator';
   static const String supportIndicator = 'supportIndicator';
   static const String trustedByIndicator = 'trustedByIndicator';
+
+    // ... your existing provider strings ...
+  static const String providerDemoCtaTitle = 'providerDemoCtaTitle';
+  static const String providerDemoCtaCaption = 'providerDemoCtaCaption';
+  static const String providerDemoCtaButtonText = 'providerDemoCtaButtonText';
+
+ 
 }

@@ -1,9 +1,10 @@
+// lib/features/home/presentation/widgets/download_cta_section.dart
+
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shamil_web/core/utils/helpers.dart';
-import 'package:shamil_web/core/widgets/animated_fade_in.dart';
 import 'package:shamil_web/core/constants/app_dimensions.dart';
 import 'package:shamil_web/core/constants/app_strings.dart';
 import 'package:shamil_web/core/constants/app_assets.dart';
@@ -12,12 +13,13 @@ class DownloadCtaSection extends StatelessWidget {
   const DownloadCtaSection({super.key});
 
   final String _appStoreUrl = 'https://apps.apple.com/app/your-app-id';
-  final String _playStoreUrl = 'https://play.google.com/store/apps/details?id=your.package.name';
+  final String _playStoreUrl =
+      'https://play.google.com/store/apps/details?id=your.package.name';
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       width: double.infinity,
       decoration: _buildGradientBackground(theme),
@@ -53,32 +55,14 @@ class DownloadCtaSection extends StatelessWidget {
   Widget _buildMainContent(BuildContext context, ThemeData theme) {
     return Column(
       children: [
-        // Phone icon with simple animation
         _buildPhoneIcon(theme),
-        
         const SizedBox(height: AppDimensions.spacingLarge),
-        
-        // Title section
         _buildTitleSection(theme),
-        
         const SizedBox(height: AppDimensions.spacingMedium),
-        
-        // Subtitle section
         _buildSubtitleSection(theme),
-        
         const SizedBox(height: AppDimensions.spacingLarge),
-        
-        // Feature badges
-        _buildFeatureBadges(theme),
-        
-        const SizedBox(height: AppDimensions.spacingExtraLarge),
-        
-        // Download buttons
-        _buildDownloadButtons(context, theme),
-        
+        _buildDownloadButtons(context , theme), // Removed theme dependency here
         const SizedBox(height: AppDimensions.spacingLarge),
-        
-        // Social proof
         _buildSocialProof(theme),
       ],
     );
@@ -104,14 +88,12 @@ class DownloadCtaSection extends StatelessWidget {
           ),
         ],
       ),
-      child: Icon(
+      child: const Icon(
         Icons.smartphone_rounded,
         size: 40,
         color: Colors.white,
       ),
-    )
-        .animate(onPlay: (controller) => controller.repeat(reverse: true))
-        .scaleXY(
+    ).animate(onPlay: (controller) => controller.repeat(reverse: true)).scaleXY(
           end: 1.1,
           duration: 2000.ms,
           curve: Curves.easeInOut,
@@ -129,13 +111,8 @@ class DownloadCtaSection extends StatelessWidget {
             letterSpacing: 1.2,
           ),
           textAlign: TextAlign.center,
-        )
-            .animate()
-            .fadeIn(duration: 800.ms)
-            .slideY(begin: 0.3, end: 0),
-        
+        ).animate().fadeIn(duration: 800.ms).slideY(begin: 0.3, end: 0),
         const SizedBox(height: 12),
-        
         Container(
           height: 3,
           width: 50,
@@ -143,87 +120,28 @@ class DownloadCtaSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(2),
             color: Colors.white.withOpacity(0.8),
           ),
-        )
-            .animate()
-            .scaleX(delay: 300.ms, duration: 600.ms),
+        ).animate().scaleX(delay: 300.ms, duration: 600.ms),
       ],
     );
   }
 
   Widget _buildSubtitleSection(ThemeData theme) {
     return Text(
-      "getStartedWithShamil".tr(),
+      AppStrings.getStartedWithShamil.tr(),
       style: theme.textTheme.titleLarge?.copyWith(
         color: Colors.white.withOpacity(0.9),
         height: 1.4,
       ),
       textAlign: TextAlign.center,
-    )
-        .animate()
-        .fadeIn(delay: 200.ms, duration: 600.ms);
+    ).animate().fadeIn(delay: 200.ms, duration: 600.ms);
   }
-
-  Widget _buildFeatureBadges(ThemeData theme) {
-    final features = [
-      {"icon": "⚡", "text": "Fast"},
-      {"icon": "🔒", "text": "Secure"},
-      {"icon": "✨", "text": "Smart"},
-    ];
-
-    return Wrap(
-      spacing: 16,
-      runSpacing: 12,
-      alignment: WrapAlignment.center,
-      children: features.asMap().entries.map((entry) {
-        final index = entry.key;
-        final feature = entry.value;
-        
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25),
-            color: Colors.white.withOpacity(0.15),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.3),
-              width: 1,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                feature["icon"]!,
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                feature["text"]!,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        )
-            .animate()
-            .fadeIn(delay: Duration(milliseconds: 400 + (index * 100)))
-            .scale(begin: const Offset(0.8, 0.8));
-      }).toList(),
-    );
-  }
-
+  
   Widget _buildDownloadButtons(BuildContext context, ThemeData theme) {
     return Column(
       children: [
-        // Primary download button
         _buildPrimaryButton(context, theme),
-        
         const SizedBox(height: 24),
-        
-        // Store buttons
-        _buildStoreButtons(context, theme),
+        _buildStoreButtons(context),
       ],
     );
   }
@@ -273,29 +191,32 @@ class DownloadCtaSection extends StatelessWidget {
         ),
       ),
     )
-        .animate(onPlay: (controller) => controller.repeat(reverse: true))
-        .scaleXY(
-          end: 1.02,
-          duration: 2000.ms,
-          curve: Curves.easeInOut,
-        )
-        .animate()
+    // *** THIS IS THE FIX for the animation crash ***
+    // The entry animation and the looping animation are now separated correctly.
+    .animate()
         .fadeIn(delay: 700.ms, duration: 600.ms)
-        .slideY(begin: 0.2, end: 0);
+        .slideY(begin: 0.2, end: 0, duration: 600.ms)
+        .then(delay: 200.ms) // Wait after entry animation
+        .animate(onPlay: (controller) => controller.repeat(reverse: true)) // THEN start the looping animation
+        .scaleXY(end: 1.02, duration: 2000.ms, curve: Curves.easeInOut);
   }
 
-  Widget _buildStoreButtons(BuildContext context, ThemeData theme) {
+  Widget _buildStoreButtons(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildStoreButton(
           onTap: () => Helpers.launchUrlHelper(context, _appStoreUrl),
+          // *** FIX for Asset Not Found error ***
+          // Use SvgPicture.asset for .svg files and the direct constant.
           child: SvgPicture.asset(AppAssets.appStoreBadge, height: 45),
           delay: 800.ms,
         ),
         const SizedBox(width: 20),
         _buildStoreButton(
           onTap: () => Helpers.launchUrlHelper(context, _playStoreUrl),
+          // *** FIX for Asset Not Found error ***
+          // Use Image.asset for .png files and the direct constant.
           child: Image.asset(AppAssets.googlePlayBadge, height: 45),
           delay: 900.ms,
         ),

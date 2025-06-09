@@ -46,7 +46,7 @@ class AppAssets {
   static const String performanceLottie = '$_lottie/performance_anim.json';
 
   // Download Badges
-  static const String appStoreBadge = '$_icons/app_store_badge.svg';
+  static const String appStoreBadge = '$_images/app_store_badge.png';
   static const String googlePlayBadge = '$_images/google_play_badge.png';
 
   // Testimonial Assets
