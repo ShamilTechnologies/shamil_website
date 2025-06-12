@@ -6,8 +6,6 @@ import 'package:shamil_web/core/constants/app_assets.dart';
 import 'package:shamil_web/core/constants/app_dimensions.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-/// Shamil Showcase Section - Fixed version
-/// This section showcases the Shamil app interface with scroll-based animations
 class ShamilShowcaseSection extends StatefulWidget {
   final ScrollController scrollController;
 
@@ -21,16 +19,15 @@ class ShamilShowcaseSection extends StatefulWidget {
 }
 
 class _ShamilShowcaseSectionState extends State<ShamilShowcaseSection> {
-  double _scrollProgress = 0.0;
   final GlobalKey _sectionKey = GlobalKey();
+  bool _isVisible = false;
 
   @override
   void initState() {
     super.initState();
     widget.scrollController.addListener(_onScroll);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _onScroll();
-    });
+    // Initial check after build
+    WidgetsBinding.instance.addPostFrameCallback((_) => _onScroll());
   }
 
   @override
@@ -42,36 +39,25 @@ class _ShamilShowcaseSectionState extends State<ShamilShowcaseSection> {
   void _onScroll() {
     if (!mounted || _sectionKey.currentContext == null) return;
 
-    final RenderBox? sectionRenderBox = 
-        _sectionKey.currentContext!.findRenderObject() as RenderBox?;
-    if (sectionRenderBox == null) return;
+    final renderBox = _sectionKey.currentContext!.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
 
-    final sectionOffset = sectionRenderBox.localToGlobal(Offset.zero);
+    final position = renderBox.localToGlobal(Offset.zero);
     final screenHeight = MediaQuery.of(context).size.height;
+    final scrollPosition = position.dy;
 
-    // Calculate scroll progress (0.0 to 1.0)
-    final scrollStartPoint = sectionOffset.dy - screenHeight;
-    final scrollEndPoint = sectionOffset.dy - (screenHeight * 0.3);
-    final currentScroll = widget.scrollController.offset;
+    // Show when at least 30% of the widget is visible
+    final shouldBeVisible = scrollPosition < screenHeight * 0.7;
 
-    double progress = 0.0;
-    if (currentScroll > scrollStartPoint && scrollEndPoint > scrollStartPoint) {
-      progress = (currentScroll - scrollStartPoint) / (scrollEndPoint - scrollStartPoint);
-    } else if (currentScroll >= scrollEndPoint) {
-      progress = 1.0;
+    if (_isVisible != shouldBeVisible) {
+      setState(() => _isVisible = shouldBeVisible);
     }
-
-    setState(() {
-      _scrollProgress = progress.clamp(0.0, 1.0);
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isMobile = ResponsiveBreakpoints.of(context).smallerOrEqualTo(MOBILE);
-
-    // Define colors for the phone mockup
     final Color phoneScreenBackgroundColor = theme.brightness == Brightness.dark
         ? Colors.grey.shade900
         : Colors.white;
@@ -93,13 +79,10 @@ class _ShamilShowcaseSectionState extends State<ShamilShowcaseSection> {
             rowSpacing: AppDimensions.paddingLarge * 2,
             columnSpacing: AppDimensions.paddingLarge * 2,
             children: [
-              // Phone Mockup
               ResponsiveRowColumnItem(
                 rowFlex: 1,
                 child: _buildPhoneMockup(phoneScreenBackgroundColor, isMobile),
               ),
-              
-              // Text Content
               ResponsiveRowColumnItem(
                 rowFlex: 1,
                 child: _buildTextContent(theme, isMobile),
@@ -111,89 +94,55 @@ class _ShamilShowcaseSectionState extends State<ShamilShowcaseSection> {
     );
   }
 
-  /// Build phone mockup with animation
   Widget _buildPhoneMockup(Color screenBackgroundColor, bool isMobile) {
-    return Animate(
-      target: _scrollProgress,
-      effects: [
-        FadeEffect(begin: 0.0, end: 1.0, duration: 600.ms),
-        ScaleEffect(
-          begin: const Offset(0.9, 0.9),
-          end: const Offset(1.0, 1.0),
-          duration: 600.ms,
-          curve: Curves.easeOutCubic,
-        ),
-        SlideEffect(
-          begin: const Offset(-0.3, 0),
-          end: Offset.zero,
-          duration: 800.ms,
-          curve: Curves.easeOutCubic,
-        ),
-      ],
-      child: PhoneMockup(
-        appInterfaceAsset: AppAssets.shamilAppInterface,
-        screenBackgroundColor: screenBackgroundColor,
-        defaultWidth: isMobile ? 200 : 260,
-      ),
-    );
+    return PhoneMockup(
+      appInterfaceAsset: AppAssets.shamilAppInterface,
+      screenBackgroundColor: screenBackgroundColor,
+      defaultWidth: isMobile ? 200 : 260,
+    )
+        .animate(target: _isVisible ? 1 : 0)
+        .fadeIn(duration: 600.ms)
+        .scale(begin: const Offset(0.9, 0.9), curve: Curves.easeOutCubic)
+        .slideX(begin: -0.3, curve: Curves.easeOutCubic);
   }
 
-  /// Build text content with animations
   Widget _buildTextContent(ThemeData theme, bool isMobile) {
-    return Animate(
-      target: _scrollProgress,
-      effects: [
-        SlideEffect(
-          begin: const Offset(0.3, 0),
-          end: Offset.zero,
-          duration: 800.ms,
-          curve: Curves.easeOutCubic,
-        ),
-        FadeEffect(begin: 0.0, end: 1.0, duration: 600.ms),
-      ],
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: isMobile ? 0 : AppDimensions.paddingLarge * 3.0,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: isMobile
-              ? CrossAxisAlignment.center
-              : CrossAxisAlignment.start,
-          children: [
-            // Title
-            Text(
-              "Experience Shamil in Action", // Using direct text since AppStrings key might not exist
-              style: (isMobile
-                      ? theme.textTheme.headlineMedium
-                      : theme.textTheme.displaySmall)
-                  ?.copyWith(
-                color: theme.colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: isMobile ? TextAlign.center : TextAlign.start,
-            ).animate(delay: 450.ms).fadeIn(duration: 600.ms),
+    return Padding(
+      padding: EdgeInsets.only(left: isMobile ? 0 : AppDimensions.paddingLarge * 3.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Experience Shamil in Action",
+            style: (isMobile ? theme.textTheme.headlineMedium : theme.textTheme.displaySmall)
+                ?.copyWith(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold),
+            textAlign: isMobile ? TextAlign.center : TextAlign.start,
+          )
+              .animate(target: _isVisible ? 1 : 0, delay: 150.ms)
+              .fadeIn(duration: 600.ms),
 
-            const SizedBox(height: AppDimensions.spacingMedium),
+          const SizedBox(height: AppDimensions.spacingMedium),
 
-            // Description
-            Text(
-              "Discover how Shamil transforms your service booking experience with intelligent features and seamless interface design.",
-              style: theme.textTheme.titleLarge?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.85),
-                height: 1.65,
-                fontSize: isMobile ? 16 : 18,
-              ),
-              textAlign: isMobile ? TextAlign.center : TextAlign.start,
-            ).animate(delay: 600.ms).fadeIn(duration: 600.ms),
-          ],
-        ),
-      ),
+          Text(
+            "Discover how Shamil transforms your service booking experience with intelligent features and seamless interface design.",
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.85),
+              height: 1.65,
+              fontSize: isMobile ? 16 : 18,
+            ),
+            textAlign: isMobile ? TextAlign.center : TextAlign.start,
+          )
+              .animate(target: _isVisible ? 1 : 0, delay: 300.ms)
+              .fadeIn(duration: 600.ms),
+        ],
+      )
+          .animate(target: _isVisible ? 1 : 0)
+          .slideX(begin: 0.3, curve: Curves.easeOutCubic),
     );
   }
 }
 
-/// Phone Mockup Widget - Fixed version
 class PhoneMockup extends StatelessWidget {
   final String appInterfaceAsset;
   final Color screenBackgroundColor;
@@ -250,7 +199,6 @@ class PhoneMockup extends StatelessWidget {
           child: Stack(
             alignment: Alignment.topCenter,
             children: [
-              // App interface image
               Positioned.fill(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(imageCornerRadius),
@@ -285,8 +233,6 @@ class PhoneMockup extends StatelessWidget {
                   ),
                 ),
               ),
-              
-              // Phone notch
               Positioned(
                 top: screenPaddingFactor * 0.5,
                 child: Container(

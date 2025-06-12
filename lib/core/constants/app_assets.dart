@@ -1,5 +1,3 @@
-// lib/core/constants/app_assets.dart
-
 class AppAssets {
   // Base paths
   static const String _images = 'assets/images';
@@ -17,6 +15,11 @@ class AppAssets {
   static const String shamilScreen1 = '$_images/shamilScreen1.jpg';
   static const String shamilScreen2 = '$_images/shamilScreen2.jpg';
   static const String shamilScreen3 = '$_images/shamilScreen3.jpg';
+
+  // --- NEW: Service/Value Section Images ---
+  static const String servicePeopleImage = '$_images/football .png';  
+  static const String servicePurposeImage = '$_images/padel.png';
+  static const String servicePerformanceImage = '$_images/wellness center.png';
 
   // --- Rocket Image ---
   static const String rocketImagePng = '$_images/rocket_image.png';

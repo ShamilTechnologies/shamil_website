@@ -13,6 +13,11 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
+  # --- FIX: ADDED THIS LINE ---
+  # This line includes the necessary Cupertino icon font family in your project,
+  # which resolves the build warning.
+  cupertino_icons: ^1.0.2
+
   # State Management
   flutter_riverpod: ^2.5.1
 
@@ -61,9 +66,6 @@ flutter:
     # Images
     - assets/images/
     - assets/icons/
-
-
-
     
     # Animations
     - assets/lottie/

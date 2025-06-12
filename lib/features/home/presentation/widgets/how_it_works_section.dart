@@ -248,7 +248,7 @@ class _EnhancedStepsSectionState extends State<EnhancedStepsSection>
     final theme = Theme.of(context);
     final isMobile = ResponsiveBreakpoints.of(context).smallerOrEqualTo(MOBILE);
 
-    return Container(
+    return SizedBox(
       height: isMobile ? 700 : 780, // Adjusted height slightly for mobile
       child: Stack(
         children: [

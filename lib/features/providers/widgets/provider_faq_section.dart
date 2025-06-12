@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart'; // Ensure this is set up correctly
+// Ensure this is set up correctly
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shamil_web/core/constants/app_dimensions.dart';
 import 'package:shamil_web/core/constants/app_colors.dart';

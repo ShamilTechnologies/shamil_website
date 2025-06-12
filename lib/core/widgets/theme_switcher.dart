@@ -1,27 +1,59 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shamil_web/core/theme/theme_provider.dart';
+import 'package:shamil_web/core/constants/app_colors.dart';
 
-class ThemeSwitcher extends ConsumerWidget {
-  const ThemeSwitcher({super.key});
+class StylizedLoadingIndicator extends StatefulWidget {
+  const StylizedLoadingIndicator({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final currentThemeMode = ref.watch(themeProvider);
-    // Determine if the effective theme is dark
-    final bool isEffectivelyDark = currentThemeMode == ThemeMode.dark ||
-        (currentThemeMode == ThemeMode.system &&
-            MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+  State<StylizedLoadingIndicator> createState() => _StylizedLoadingIndicatorState();
+}
 
-    return IconButton(
-      icon: Icon(
-        isEffectivelyDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-        color: Theme.of(context).appBarTheme.iconTheme?.color, // Use color from AppBarTheme
+class _StylizedLoadingIndicatorState extends State<StylizedLoadingIndicator>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: FadeTransition(
+        opacity: _animation,
+        child: Container(
+          width: 80,
+          height: 10,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            gradient: LinearGradient(
+              colors: [
+                AppColors.primary,
+                AppColors.primaryGold,
+              ],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+          ),
+        ),
       ),
-      tooltip: isEffectivelyDark ? 'Switch to Light Theme' : 'Switch to Dark Theme',
-      onPressed: () {
-        ref.read(themeProvider.notifier).toggleTheme();
-      },
     );
   }
 }

@@ -105,7 +105,7 @@ class ProviderPricingSection extends StatelessWidget {
         vertical: isMobile ? AppDimensions.paddingSectionVertical * 0.8 : AppDimensions.paddingSectionVertical,
         horizontal: AppDimensions.paddingPageHorizontal,
       ),
-      color: theme.brightness == Brightness.light ? Colors.grey.shade100 : theme.colorScheme.surfaceVariant, // Slightly different color for testing
+      color: theme.brightness == Brightness.light ? Colors.grey.shade100 : theme.colorScheme.surfaceContainerHighest, // Slightly different color for testing
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

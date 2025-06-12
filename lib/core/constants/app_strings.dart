@@ -12,7 +12,7 @@ class AppStrings {
   static const String whatIsShamil = 'whatIsShamil';
   static const String introText = 'introText';
   
-  // Benefits Section
+  // ⭐ Benefits Section ⭐
   static const String forUsersTitle = 'forUsersTitle'; // Used in BenefitCard
   static const String forUsersBenefit1 = 'forUsersBenefit1'; // Used in BenefitCard
   static const String forUsersBenefit2 = 'forUsersBenefit2'; // Used in BenefitCard
@@ -32,7 +32,7 @@ class AppStrings {
   static const String tapToFlip = 'tapToFlip';
   static const String tapAgainToFlipBack = 'tapAgainToFlipBack';
   
-  // Features Section
+  // ⭐ Features Section ⭐
   static const String featuresTitle = 'featuresTitle';
   static const String featureBooking = 'featureBooking';
   static const String featurePayment = 'featurePayment';
@@ -41,7 +41,7 @@ class AppStrings {
   static const String featureLocation = 'featureLocation';
   static const String featurePerformance = 'featurePerformance';
   
-  // How It Works Section
+  // ⭐ How It Works Section ⭐
   static const String howItWorksTitle = 'howItWorksTitle';
   static const String step1Title = 'step1Title';
   static const String step1Desc = 'step1Desc';
@@ -50,14 +50,14 @@ class AppStrings {
   static const String step3Title = 'step3Title';
   static const String step3Desc = 'step3Desc';
   
-  // App Preview Section
+  // ⭐ App Preview Section ⭐
   static const String appPreviewTitle = 'appPreviewTitle';
   static const String previewSectionTitle = 'previewSectionTitle';
   static const String previewSectionSubtitle = 'previewSectionSubtitle';
   static const String previewTryForFree = 'previewTryForFree';
   static const String previewShowMore = 'previewShowMore';
   
-  // Mobile App Pages Section 
+  //⭐ Mobile App Pages Section ⭐
   static const String mobileAppPagesTitle = 'mobileAppPagesTitle'; 
   static const String mobileAppPagesSubtitle = 'mobileAppPagesSubtitle'; 
   static const String mobileShowcaseTitle = 'mobileShowcaseTitle';
@@ -81,11 +81,11 @@ class AppStrings {
   static const String experienceFutureTitle = 'experienceFutureTitle';
   static const String downloadTransformText = 'downloadTransformText';
   
-  // Shamil Showcase Section
+  // ⭐ Shamil Showcase Section ⭐
   static const String shamilShowcaseTitle = 'shamilShowcaseTitle';
   static const String shamilShowcaseDescription = 'shamilShowcaseDescription';
   
-  // Testimonials Section
+  // ⭐ Testimonials Section ⭐
   static const String testimonialsTitle = 'testimonialsTitle';
   static const String testimonial1CompanyName = 'testimonial1CompanyName';
   static const String testimonial1Text = 'testimonial1Text';
@@ -100,20 +100,72 @@ class AppStrings {
   static const String testimonial3UserName = 'testimonial3UserName';
   static const String testimonial3UserTitle = 'testimonial3UserTitle';
   
-  // Footer Section
+  // ⭐ Footer Section ⭐
   static const String footerContact = 'footerContact';
   static const String footerPrivacy = 'footerPrivacy';
   static const String footerTerms = 'footerTerms';
   static const String allRightsReserved = 'allRightsReserved';
   
-  // Language Settings
+  // ⭐ Language Settings ⭐
   static const String language = 'language';
   static const String english = 'english';
   static const String arabic = 'arabic';
   
-  // Additional strings
+  // ⭐ Additional strings ⭐
   static const String getStartedWithShamil = 'getStartedWithShamil';
   static const String learnMoreAbout = 'learnMoreAbout';
+
+ 
+ // Services Section
+  static const String servicesTitle = 'servicesTitle';
+  static const String servicesSubtitle = 'servicesSubtitle';
+  static const String servicesSectionTitle = 'servicesSectionTitle';
+  static const String servicesSectionDescription = 'servicesSectionDescription';
+
+  // Service Items
+  static const String servicePeopleTitle = 'servicePeopleTitle';
+  static const String servicePeopleDescription = 'servicePeopleDescription';
+  static const String servicePurposeTitle = 'servicePurposeTitle';
+  static const String servicePurposeDescription = 'servicePurposeDescription';
+  static const String servicePerformanceTitle = 'servicePerformanceTitle';
+  static const String servicePerformanceDescription = 'servicePerformanceDescription';
+
+  // Common Actions
+  static const String learnMore = 'learnMore';
+
+
+  // Menu Subtitles
+  static const String learnMoreAboutShamil = 'learnMoreAboutShamil';
+  static const String exploreOurOfferings = 'exploreOurOfferings';
+  static const String seeOurAppInAction = 'seeOurAppInAction';
+  static const String discoverAISolutions = 'discoverAISolutions';
+  static const String learnHowShamilWorks = 'learnHowShamilWorks';
+  static const String discoverPowerfulCapabilities = 'discoverPowerfulCapabilities';
+  static const String advantagesOfUsingShamil = 'advantagesOfUsingShamil';
+  static const String whatOurUsersSay = 'whatOurUsersSay';
+  static const String getShamilOnYourDevice = 'getShamilOnYourDevice';
+  static const String getInTouchWithUs = 'getInTouchWithUs';
+
+  // AI Show Case Section 
+  static const String aiShowcaseTitle = "AI Insights";
+
+
+
+  // FIX: Renamed from 'services...' to 'values...' to match new design
+  static const String valuesSectionBadge = 'valuesSectionBadge'; // "Our values"
+  static const String valuesSectionTitle = 'valuesSectionTitle'; // "The values that light our path"
+  static const String valuesSectionTitleHighlight = 'valuesSectionTitleHighlight'; // "light our path"
+
+  
+  // Section header titles
+  static const String valuesSectionSubtitle = 'valuesSectionSubtitle'; 
+
+  // FIX: Renamed keys to match the new service titles
+  static const String valueFootballTitle = 'valueFootballTitle';
+  static const String valuePadelTitle = 'valuePadelTitle';
+  static const String valueWellnessTitle = 'valueWellnessTitle';
+  
+  
 }
 
 
@@ -237,11 +289,16 @@ class ProviderStrings {
   static const String uptimeIndicator = 'uptimeIndicator';
   static const String supportIndicator = 'supportIndicator';
   static const String trustedByIndicator = 'trustedByIndicator';
+  
+  // --- NEW: Added missing strings for the Download CTA ---
+  static const String downloadDesktopApp = 'downloadDesktopApp';
+  static const String selectYourOS = 'selectYourOS';
+  static const String downloadForWindows = 'downloadForWindows';
+  static const String downloadForMacOS = 'downloadForMacOS';
+  static const String downloadForLinux = 'downloadForLinux';
 
-    // ... your existing provider strings ...
+  // Demo CTA Section
   static const String providerDemoCtaTitle = 'providerDemoCtaTitle';
   static const String providerDemoCtaCaption = 'providerDemoCtaCaption';
   static const String providerDemoCtaButtonText = 'providerDemoCtaButtonText';
-
- 
 }

@@ -7,9 +7,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:shamil_web/core/constants/app_colors.dart';
 import 'package:shamil_web/core/constants/app_dimensions.dart';
-import 'package:shamil_web/core/constants/app_assets.dart'; // Assuming you have assets for mockups
+// Assuming you have assets for mockups
 import 'package:shamil_web/core/widgets/custom_button.dart';
-import 'package:shamil_web/core/widgets/phone_mockup.dart'; // Assuming this exists and is styled
+// Assuming this exists and is styled
 
 // Placeholder AppStrings - replace with your actual localization keys
 class _AppStringsPlaceholder {

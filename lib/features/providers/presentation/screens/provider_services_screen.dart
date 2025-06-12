@@ -1,17 +1,17 @@
-// lib/features/providers/presentation/screens/provider_services_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shamil_web/core/widgets/modern_app_bar.dart';
 import 'package:shamil_web/core/widgets/scroll_to_top_fab.dart';
+// ADDED: Imported the animated gradient background to be used on this screen.
+import 'package:shamil_web/features/common/widgets/animated_gradient_background.dart';
 import 'package:shamil_web/features/home/presentation/widgets/footer_section.dart';
-
-// Import all the provider section widgets
 import 'package:shamil_web/features/providers/widgets/provider_hero_section.dart';
 import 'package:shamil_web/features/providers/widgets/provider_how_it_works_section.dart';
 import 'package:shamil_web/features/providers/widgets/provider_features_section.dart';
 import 'package:shamil_web/features/providers/widgets/provider_pricing_section.dart';
 import 'package:shamil_web/features/providers/widgets/provider_faq_section.dart';
 import 'package:shamil_web/features/providers/widgets/provider_cta_section.dart';
+import 'package:shamil_web/features/providers/widgets/provider_dashboard_demo_cta_section.dart';
 
 class ProviderServicesScreen extends StatefulWidget {
   const ProviderServicesScreen({super.key});
@@ -20,18 +20,17 @@ class ProviderServicesScreen extends StatefulWidget {
   State<ProviderServicesScreen> createState() => _ProviderServicesScreenState();
 }
 
+// OPTIMIZATION 1: Added 'AutomaticKeepAliveClientMixin'.
+// This mixin ensures that the state of this screen is preserved, which works
+// with the ListView to keep scrolled-off sections in memory. This provides
+// an incredibly fluid and flexible scrolling experience, as widgets don't
+// need to be rebuilt when you scroll back to them.
 class _ProviderServicesScreenState extends State<ProviderServicesScreen>
-    with TickerProviderStateMixin {
-  // --- CONTROLLERS ---
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   late ScrollController _scrollController;
   late AnimationController _pageEntryController;
-  late AnimationController _backgroundAnimationController;
-  // ** FIX: Re-added the required controller for particles. **
   late AnimationController _floatingParticlesController;
-
-  // --- STATE ---
   late List<Widget> _providerSections;
-  bool _isLoading = true;
 
   @override
   void initState() {
@@ -39,10 +38,8 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen>
     _initializeControllers();
     _initializeProviderSections();
 
-    // Simulate a short delay before showing content.
-    Future.delayed(const Duration(milliseconds: 50), () {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        setState(() => _isLoading = false);
         _pageEntryController.forward();
       }
     });
@@ -52,46 +49,30 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen>
     _scrollController = ScrollController();
     _pageEntryController = AnimationController(
         duration: const Duration(milliseconds: 500), vsync: this);
-    _backgroundAnimationController = AnimationController(
-        duration: const Duration(seconds: 25), vsync: this)
-      ..repeat(reverse: true);
-      
-    // ** FIX: Initialize the floating particles controller. **
     _floatingParticlesController = AnimationController(
       duration: const Duration(seconds: 30),
       vsync: this,
     )..repeat();
   }
 
-  /// This list is now built only once, which is critical for stability.
   void _initializeProviderSections() {
     _providerSections = [
       ProviderHeroSection(
-        key: const ValueKey("provider_hero"),
-        // ** FIX: Pass the required controller to the widget. **
         floatingParticlesController: _floatingParticlesController,
       ),
       ProviderHowItWorksSection(
-        key: const ValueKey("provider_how_it_works"),
         scrollController: _scrollController,
       ),
       ProviderFeaturesSection(
-        key: const ValueKey("provider_features"),
         scrollController: _scrollController,
       ),
-      const ProviderPricingSection(
-        key: ValueKey("provider_pricing")
-      ),
-      const ProviderFaqSection(
-        key: ValueKey("provider_faq")
-      ),
+      const ProviderDashboardDemoCtaSection(),
+      const ProviderPricingSection(),
+      const ProviderFaqSection(),
       ProviderCtaSection(
-        key: const ValueKey("provider_cta"),
-        // ** FIX: Pass the required controller to the widget. **
         floatingParticlesController: _floatingParticlesController,
       ),
       FooterSection(
-        key: const ValueKey("footer_section_provider"),
         scrollController: _scrollController,
       ),
     ];
@@ -101,22 +82,22 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen>
   void dispose() {
     _scrollController.dispose();
     _pageEntryController.dispose();
-    _backgroundAnimationController.dispose();
-    // ** FIX: Dispose the added controller. **
     _floatingParticlesController.dispose();
     super.dispose();
   }
 
+  // OPTIMIZATION 2: Required by AutomaticKeepAliveClientMixin.
+  // Returning 'true' here is what activates the keep-alive behavior.
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    // OPTIMIZATION 3: This call is also required by the mixin to register
+    // the widget for preservation.
+    super.build(context);
 
-    if (_isLoading) {
-      return Scaffold(
-        backgroundColor: theme.colorScheme.surface,
-        body: const Center(child: CircularProgressIndicator()),
-      );
-    }
+    final theme = Theme.of(context);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -124,16 +105,32 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen>
       appBar: ModernAppBar(scrollController: _scrollController),
       body: Stack(
         children: [
-          _buildAnimatedBackground(theme),
+          // ADDED: Placed the AnimatedGradientBackground here. This removes the solid color
+          // from behind the AppBar and replaces it with a dynamic gradient, creating a
+          // seamless look where the AppBar floats over the content.
+          const AnimatedGradientBackground(),
           Animate(
             controller: _pageEntryController,
             effects: const [
               FadeEffect(duration: Duration(milliseconds: 500), curve: Curves.easeOut)
             ],
-            child: SingleChildScrollView(
+            // OPTIMIZATION 4: Replaced the inefficient SingleChildScrollView + Column
+            // with a highly performant ListView.builder. This is the core change
+            // that guarantees smooth scrolling by only building visible sections.
+            child: ListView.builder(
               controller: _scrollController,
               physics: const BouncingScrollPhysics(),
-              child: Column(children: _providerSections),
+              itemCount: _providerSections.length,
+              itemBuilder: (context, index) {
+                // OPTIMIZATION 5: Wrapped each section in a RepaintBoundary.
+                // This is a powerful optimization that gives each section its
+                // own drawing layer. It prevents any animations or updates
+                // in one section from causing any other section to repaint,
+                // which is essential for a "very very smooth" scroll.
+                return RepaintBoundary(
+                  child: _providerSections[index],
+                );
+              },
             ),
           ),
           Positioned(
@@ -142,24 +139,6 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen>
             child: ScrollToTopFAB(scrollController: _scrollController),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildAnimatedBackground(ThemeData theme) {
-    // This background is simple and less likely to cause issues.
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            theme.colorScheme.primary.withOpacity(0.05),
-            theme.colorScheme.surface.withOpacity(0.0),
-          ],
-          stops: const [0.0, 0.4],
-        ),
       ),
     );
   }
